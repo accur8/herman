@@ -391,9 +391,121 @@ func runCommandMode() error {
 	case "help", "--help", "-h":
 		showCommandHelp()
 		return nil
+	case "generate":
+		return runGenerateCommand()
 	default:
 		return fmt.Errorf("unknown command: %s\nRun 'herman help' for usage", command)
 	}
+}
+
+func runGenerateCommand() error {
+	if len(os.Args) < 3 {
+		return fmt.Errorf("generate command requires a config file path\nUsage: herman generate <config.json> [output-dir]")
+	}
+
+	configPath := os.Args[2]
+	outputDir := "."
+	if len(os.Args) >= 4 {
+		outputDir = os.Args[3]
+	}
+
+	// Check for --trace flag
+	for _, arg := range os.Args[3:] {
+		if arg == "--trace" {
+			traceMode = true
+			trace("Trace mode enabled")
+		}
+	}
+
+	// Read the config file
+	config, err := readLauncherConfig(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to read config file: %w", err)
+	}
+
+	trace("Loaded config: %s:%s (org: %s)", config.Artifact, config.Branch, config.Organization)
+
+	// Get home directory for repo config
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("failed to get user home directory: %w", err)
+	}
+
+	// Fetch maven metadata and get latest version
+	fmt.Fprintf(os.Stderr, "Fetching latest version for %s:%s...\n", config.Organization, config.Artifact)
+
+	repoConfig, err := readRepoConfig(homeDir, config.Repo)
+	if err != nil {
+		return fmt.Errorf("failed to read repo config: %w", err)
+	}
+
+	metadata, err := FetchMavenMetadata(repoConfig, config.Organization, config.Artifact)
+	if err != nil {
+		return fmt.Errorf("failed to fetch maven metadata: %w", err)
+	}
+
+	latestVersion, err := FindLatestVersion(metadata, config.Branch)
+	if err != nil {
+		return fmt.Errorf("failed to find latest version: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "Latest version: %s\n", latestVersion)
+
+	// Fetch dependencies from API
+	fmt.Fprintf(os.Stderr, "Fetching dependencies...\n")
+	nixBuildResp, err := callNixBuildDescriptionAPIWithVersion(repoConfig, config, config.Name, []string{}, latestVersion)
+	if err != nil {
+		return fmt.Errorf("failed to fetch dependencies: %w", err)
+	}
+
+	if len(nixBuildResp.ResolutionResponse.Artifacts) == 0 {
+		return fmt.Errorf("no dependencies returned from API")
+	}
+
+	dependencies := nixBuildResp.ResolutionResponse.Artifacts
+	trace("Received %d dependencies from API", len(dependencies))
+
+	// Fetch missing hashes
+	fmt.Fprintf(os.Stderr, "Fetching SHA256 hashes...\n")
+	dependencies, err = FetchMissingHashes(dependencies)
+	if err != nil {
+		return fmt.Errorf("failed to fetch hashes: %w", err)
+	}
+
+	// Create output directory if it doesn't exist
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Generate default.nix
+	fmt.Fprintf(os.Stderr, "Generating Nix files...\n")
+
+	nixConfig := LauncherNixConfig{
+		Name:         config.Name,
+		MainClass:    config.MainClass,
+		JvmArgs:      config.JvmArgs,
+		Args:         config.Args,
+		Repo:         config.Repo,
+		Organization: config.Organization,
+		Artifact:     config.Artifact,
+		Version:      latestVersion,
+		Branch:       config.Branch,
+		JavaVersion:  "", // Could be extracted from config if needed
+		Dependencies: dependencies,
+	}
+
+	defaultNixContent := GenerateDefaultNix(nixConfig)
+	defaultNixPath := filepath.Join(outputDir, "default.nix")
+	if err := os.WriteFile(defaultNixPath, []byte(defaultNixContent), 0644); err != nil {
+		return fmt.Errorf("failed to write default.nix: %w", err)
+	}
+
+	fmt.Fprintf(os.Stderr, "Generated Nix files in %s\n", outputDir)
+	fmt.Printf("  default.nix\n")
+	fmt.Printf("\nVersion: %s\n", latestVersion)
+	fmt.Printf("Dependencies: %d\n", len(dependencies))
+
+	return nil
 }
 
 func showCommandHelp() {
@@ -404,6 +516,8 @@ USAGE:
 
 COMMANDS:
   help                        Show this help message
+  generate <config.json> [output-dir]
+                              Generate Nix files from config (for embedding in Nix builds)
   update <symlink>            Update a specific installation
   list                        List all installations
   clean <org>/<artifact>      Clean old versions
@@ -412,6 +526,7 @@ COMMANDS:
 
 EXAMPLES:
   herman help
+  herman generate my-app.json ./nix-output
   herman update ~/bin/a8-codegen
   herman list
   herman clean io.accur8/a8-versions_3

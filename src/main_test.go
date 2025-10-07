@@ -39,7 +39,7 @@ func TestReadLauncherConfig(t *testing.T) {
 
 	// Test reading the config
 	t.Run("ReadLauncherConfig", func(t *testing.T) {
-		readConfig, err := readLauncherConfig(configPath)
+		readConfig, err := readLauncherConfig(configPath, "")
 		if err != nil {
 			t.Fatalf("Failed to read launcher config: %v", err)
 		}
@@ -66,7 +66,7 @@ func TestReadLauncherConfig(t *testing.T) {
 
 	// Test error case - missing file
 	t.Run("MissingFile", func(t *testing.T) {
-		_, err := readLauncherConfig(filepath.Join(tempDir, "nonexistent.json"))
+		_, err := readLauncherConfig(filepath.Join(tempDir, "nonexistent.json"), "")
 		if err == nil {
 			t.Error("Expected error for missing file, got nil")
 		}

@@ -116,7 +116,7 @@ func run() error {
 	configPath := filepath.Join(programDir, programName+".json")
 	trace("Config path: %s", configPath)
 
-	config, err := readLauncherConfig(configPath)
+	config, err := readLauncherConfig(configPath, programName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			showHelp(programName)
@@ -228,7 +228,7 @@ func run() error {
 	return nil
 }
 
-func readLauncherConfig(path string) (*LauncherConfig, error) {
+func readLauncherConfig(path string, defaultName string) (*LauncherConfig, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -241,7 +241,11 @@ func readLauncherConfig(path string) (*LauncherConfig, error) {
 
 	// Apply defaults
 	if config.Name == "" {
-		config.Name = config.Artifact
+		if defaultName != "" {
+			config.Name = defaultName
+		} else {
+			config.Name = config.Artifact
+		}
 	}
 	if config.JvmArgs == nil {
 		config.JvmArgs = []string{}
@@ -431,7 +435,7 @@ func runGenerateCommand() error {
 	}
 
 	// Read the config file
-	config, err := readLauncherConfig(configPath)
+	config, err := readLauncherConfig(configPath, "")
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
 	}

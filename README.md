@@ -8,9 +8,11 @@ Herman is a launcher for Java applications that uses Nix for dependency manageme
 2. It reads the configuration from `a8-codegen.json` in the same directory
 3. It checks if the application is already installed in `~/.a8/herman/builds/`
 4. If not installed:
-   - Ensures the shared root flake exists at `~/.a8/herman/flake.nix`
-   - Fetches the Nix build description from the configured repository
-   - Writes the Nix files and per-package flake.nix to the build directory
+   - Discovers the latest version from the Maven repository's `maven-metadata.xml`
+   - Fetches dependency information from the configured repository API
+   - Fetches SHA256 hashes using `nix store prefetch-file` (adds files to Nix store)
+   - Generates Nix files locally (default.nix with inline launcher script)
+   - Writes the per-package flake.nix to the build directory
    - Runs `nix build` using the shared nixpkgs from the root flake
    - Caches the result
 5. Executes the installed application, passing through all arguments
@@ -28,9 +30,21 @@ Herman is a launcher for Java applications that uses Nix for dependency manageme
     "jvmArgs": [],
     "args": [],
     "name": "a8-codegen",
-    "repo": "repo"
+    "repo": "repo",
+    "webappExplode": false
 }
 ```
+
+**Configuration Fields:**
+- `mainClass` (required): The Java main class to execute
+- `organization` (required): Maven organization/group ID
+- `artifact` (required): Maven artifact ID
+- `branch` (required): Branch name for version resolution
+- `jvmArgs` (optional): Array of JVM arguments (e.g., `["-Xmx2g"]`)
+- `args` (optional): Array of default application arguments
+- `name` (required): Application name (used for executable naming)
+- `repo` (required): Repository prefix from `~/.a8/repo.properties`
+- `webappExplode` (optional): If true, extracts `webapp/*` from all JARs to `$HERMAN_NIX_STORE/webapp-composite/`
 
 ### Repository Config (`~/.a8/repo.properties`)
 
@@ -100,6 +114,12 @@ cat ~/.a8/herman/flake.lock | grep -A 5 '"nixpkgs"'
 - **Easy updates**: Update all packages' nixpkgs with one command
 - **Explicit dependencies**: The exact nixpkgs version is recorded in flake.lock
 
+## Environment Variables
+
+Herman sets the following environment variables for launched applications:
+
+- `HERMAN_NIX_STORE`: Path to the Nix store directory for the application (e.g., `/nix/store/xxx-a8-codegen`). This is set at build time and available to the application at runtime, useful for locating resources relative to the installation directory.
+
 ## Herman Flags
 
 Herman supports special `--herman-*` flags that control the launcher itself, separate from the application's arguments:
@@ -144,6 +164,9 @@ When invoked directly as `herman` (not via symlink), Herman enters command mode 
 # Show command help
 herman help
 
+# Generate Nix files from a config file (for embedding in Nix builds)
+herman generate app-config.json ./output-dir
+
 # Update a specific installation
 herman update ~/bin/a8-codegen
 
@@ -160,7 +183,27 @@ herman gc
 herman info ~/bin/a8-codegen
 ```
 
-**Note:** Command mode features are currently limited. Most functionality is available via `--herman-*` flags.
+#### Generate Command
+
+The `herman generate` command creates standalone Nix files from a launcher config without requiring Herman at runtime:
+
+```bash
+herman generate my-app.json ./nix-output
+```
+
+This is useful for:
+- Embedding applications in other Nix builds
+- Creating reproducible builds without Herman dependency
+- Pre-generating Nix expressions for version control
+
+The command:
+1. Discovers the latest version from Maven metadata
+2. Fetches dependency information from the API
+3. Downloads SHA256 hashes from Maven `.sha256` files (faster, no JAR downloads)
+4. Generates `default.nix` with all dependencies in SRI hash format
+5. Creates a `flake.nix` that references the root Herman flake
+
+The generated files can be built with `nix build` without Herman installed.
 
 ## Project Structure
 
@@ -292,9 +335,7 @@ See [test/integration/README.md](test/integration/README.md) for complete testin
                 │   ├── <name> -> /nix/store/.../bin/<name>  # Executable symlink
                 │   └── nix-build/              # Nix build files and script
                 │       ├── flake.nix           # Per-package flake (follows root)
-                │       ├── default.nix         # Main nix build definition
-                │       ├── java-launcher-config.nix
-                │       ├── java-launcher-template
+                │       ├── default.nix         # Generated Nix build with inline launcher
                 │       ├── nixBuildDescription-response.json  # Raw API response
                 │       ├── build.sh            # Reproducible build script
                 │       └── result -> /nix/store/...  # Build result (prevents GC)
@@ -307,23 +348,25 @@ Example:
 ├── flake.nix
 ├── flake.lock
 └── builds/io.accur8/a8-codegen_2.13/
-    ├── 0.1.0-20241022_1519_master/
+    ├── 0.1.0-20250503_1316_master/
     │   ├── metadata.json
     │   ├── a8-codegen -> /nix/store/6kxpzdzxzhphnm0kpb0v2ii4qxb4ddqh-a8-codegen/bin/a8-codegen
     │   └── nix-build/
     │       ├── flake.nix
     │       ├── default.nix
-    │       ├── java-launcher-config.nix
-    │       ├── java-launcher-template
     │       ├── nixBuildDescription-response.json
     │       ├── build.sh
     │       └── result -> /nix/store/6kxpzdzxzhphnm0kpb0v2ii4qxb4ddqh-a8-codegen
-    └── latest-master -> 0.1.0-20241022_1519_master/
+    └── latest-master -> 0.1.0-20250503_1316_master/
 ```
 
 The `nix-build/` directory contains:
 - `flake.nix`: Per-package flake that follows the shared nixpkgs from `~/.a8/herman/flake.lock`
-- `default.nix`, `java-launcher-config.nix`, `java-launcher-template`: Nix build files fetched from the repository
+- `default.nix`: Generated Nix build file with:
+  - Dependency list with SRI format hashes (`sha256-<base64>`)
+  - Inline launcher script with HERMAN_NIX_STORE environment variable
+  - Java version selection (supports JDK 8, 11, 17, 21, 22, 23)
+  - Optional webapp explosion for web applications
 - `nixBuildDescription-response.json`: Raw API response for debugging
 - `build.sh`: Reproducible build script using `nix build`
 - `result`: Symlink to Nix store, preventing garbage collection

@@ -485,7 +485,6 @@ func runGenerateCommand() error {
 
 	// Fetch missing hashes
 	// Use Maven repo .sha256 files for generation (faster, no downloads)
-	fmt.Fprintf(os.Stderr, "Fetching SHA256 hashes...\n")
 	dependencies, err = FetchMissingHashes(dependencies, false)
 	if err != nil {
 		return fmt.Errorf("failed to fetch hashes: %w", err)

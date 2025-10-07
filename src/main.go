@@ -49,13 +49,14 @@ type HermanFlags struct {
 }
 
 type LauncherConfig struct {
+	Kind          string   `json:"kind,omitempty"`
 	MainClass     string   `json:"mainClass"`
 	Organization  string   `json:"organization"`
 	Artifact      string   `json:"artifact"`
 	Branch        string   `json:"branch"`
-	JvmArgs       []string `json:"jvmArgs"`
-	Args          []string `json:"args"`
-	Name          string   `json:"name"`
+	JvmArgs       []string `json:"jvmArgs,omitempty"`
+	Args          []string `json:"args,omitempty"`
+	Name          string   `json:"name,omitempty"`
 	Repo          string   `json:"repo"`
 	WebappExplode *bool    `json:"webappExplode,omitempty"`
 }
@@ -236,6 +237,17 @@ func readLauncherConfig(path string) (*LauncherConfig, error) {
 	var config LauncherConfig
 	if err := json.Unmarshal(data, &config); err != nil {
 		return nil, err
+	}
+
+	// Apply defaults
+	if config.Name == "" {
+		config.Name = config.Artifact
+	}
+	if config.JvmArgs == nil {
+		config.JvmArgs = []string{}
+	}
+	if config.Args == nil {
+		config.Args = []string{}
 	}
 
 	return &config, nil

@@ -1,0 +1,849 @@
+{
+  "files": [
+    {
+      "filename": "default.nix",
+      "contents": "{\n  fetchurl,\n  linkFarm,\n  jdk8,\n  jdk11,\n  jdk17,\n  stdenv,\n  unzip,\n}:\n\n  let\n\n    launcherConfig = \n      {\n      \n        name = \"a8-codegen\";\n        mainClass = \"a8.codegen.Codegen\";\n        jvmArgs = [];\n        args =  [];\n        repo = \"repo\";\n        organization = \"io.accur8\";\n        artifact = \"a8-versions_3\";\n        version = null;\n        branch = \"master\";\n        webappExplode = null;\n        javaVersion = null;\n      \n        dependencies = [\n          { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-versions_3/1.0.0-20241022_1519_master/a8-versions_3-1.0.0-20241022_1519_master.jar\";  sha256 = \"0ifqy3ay4m9ngz4hzrlwxh0fmagcfrckwx2m3y6w4m9lb2dyp9a7\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-versions_3)\";  version = \"Version(1.0.0-20241022_1519_master)\";  m2RepoPath = \"io/accur8/a8-versions_3/1.0.0-20241022_1519_master/a8-versions_3-1.0.0-20241022_1519_master.jar\";  filename = \"a8-versions_3-1.0.0-20241022_1519_master.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/scala-lang/scala3-library_3/3.3.1/scala3-library_3-3.3.1.jar\";  sha256 = \"022maifz46v0cc01m6l8ysg7m3dkx44wriky8lij7b6iyg0i6k5n\";  organization = \"Organization(org.scala-lang)\";  module = \"Artifact(scala3-library_3)\";  version = \"Version(3.3.1)\";  m2RepoPath = \"org/scala-lang/scala3-library_3/3.3.1/scala3-library_3-3.3.1.jar\";  filename = \"scala3-library_3-3.3.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier_2.13/2.1.4/coursier_2.13-2.1.4.jar\";  sha256 = \"15xq477nx39qqlrr4785y82scdn336flpcfjna6397x58n973lw3\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier_2.13/2.1.4/coursier_2.13-2.1.4.jar\";  filename = \"coursier_2.13-2.1.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-cache_2.13/2.1.4/coursier-cache_2.13-2.1.4.jar\";  sha256 = \"12mc6cqyjzx4sdnj65qgm8mg1c4s0zhw14qpcy8vsx6xgziym2ff\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-cache_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-cache_2.13/2.1.4/coursier-cache_2.13-2.1.4.jar\";  filename = \"coursier-cache_2.13-2.1.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-xml_3/2.1.0/scala-xml_3-2.1.0.jar\";  sha256 = \"1kgfrfsflgw9imfh2by74c1d787hnza45k7fa1jisjszax1j7wj8\";  organization = \"Organization(org.scala-lang.modules)\";  module = \"Artifact(scala-xml_3)\";  version = \"Version(2.1.0)\";  m2RepoPath = \"org/scala-lang/modules/scala-xml_3/2.1.0/scala-xml_3-2.1.0.jar\";  filename = \"scala-xml_3-2.1.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/client3/core_3/3.8.15/core_3-3.8.15.jar\";  sha256 = \"09wkfzzy7y1yl2828v3xhkyzkvwqm2mpgdxfm5ggl0ccxvza3r2n\";  organization = \"Organization(com.softwaremill.sttp.client3)\";  module = \"Artifact(core_3)\";  version = \"Version(3.8.15)\";  m2RepoPath = \"com/softwaremill/sttp/client3/core_3/3.8.15/core_3-3.8.15.jar\";  filename = \"core_3-3.8.15.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/lihaoyi/fastparse_3/3.0.1/fastparse_3-3.0.1.jar\";  sha256 = \"0mzgfg4lsivkh02is49vlqq4fi6hs2xhs3bmpp2n7g08jkcv4wfn\";  organization = \"Organization(com.lihaoyi)\";  module = \"Artifact(fastparse_3)\";  version = \"Version(3.0.1)\";  m2RepoPath = \"com/lihaoyi/fastparse_3/3.0.1/fastparse_3-3.0.1.jar\";  filename = \"fastparse_3-3.0.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-sync-api_3/1.0.0-20240120_1020_master/a8-sync-api_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"00np9804wkv6yn3xj3giwlns9ygpkvvcmsjl1bhphh3akrd993ln\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-sync-api_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-sync-api_3/1.0.0-20240120_1020_master/a8-sync-api_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-sync-api_3-1.0.0-20240120_1020_master.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/rogach/scallop_3/4.1.0/scallop_3-4.1.0.jar\";  sha256 = \"1i7c2pa2s8rjry8n2kk2mdavfrcdckzw7vvd3q2z4gsm9rmi9r0w\";  organization = \"Organization(org.rogach)\";  module = \"Artifact(scallop_3)\";  version = \"Version(4.1.0)\";  m2RepoPath = \"org/rogach/scallop_3/4.1.0/scallop_3-4.1.0.jar\";  filename = \"scallop_3-4.1.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-process_3/0.7.2/zio-process_3-0.7.2.jar\";  sha256 = \"13rcvlza2gh99j0cskbmv1axvcvjbag59wkjilfn65dfqggk2bn5\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-process_3)\";  version = \"Version(0.7.2)\";  m2RepoPath = \"dev/zio/zio-process_3/0.7.2/zio-process_3-0.7.2.jar\";  filename = \"zio-process_3-0.7.2.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/cats-parse_3/0.3.9/cats-parse_3-0.3.9.jar\";  sha256 = \"08c3ky6r6qn0ypfgxmq08mbdysmm6ni5yjny4zsl017k2r8hi1vd\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(cats-parse_3)\";  version = \"Version(0.3.9)\";  m2RepoPath = \"org/typelevel/cats-parse_3/0.3.9/cats-parse_3-0.3.9.jar\";  filename = \"cats-parse_3-0.3.9.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/apache-client/2.19.6/apache-client-2.19.6.jar\";  sha256 = \"17nn1b5670mkbs2zxv67540iy8z2ky98zh0rshvc3iv0c559p5w6\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(apache-client)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/apache-client/2.19.6/apache-client-2.19.6.jar\";  filename = \"apache-client-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/route53/2.19.6/route53-2.19.6.jar\";  sha256 = \"03l6k7b979yp6xw6cmckngkwg7m9glsb49xdrrswz40i6y86jxkk\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(route53)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/route53/2.19.6/route53-2.19.6.jar\";  filename = \"route53-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/scala-lang/scala-library/2.13.10/scala-library-2.13.10.jar\";  sha256 = \"1hdivpz604rk4xnnzgz82viric4b3z778cxg73xfh0yf7xy61jp6\";  organization = \"Organization(org.scala-lang)\";  module = \"Artifact(scala-library)\";  version = \"Version(2.13.10)\";  m2RepoPath = \"org/scala-lang/scala-library/2.13.10/scala-library-2.13.10.jar\";  filename = \"scala-library-2.13.10.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/github/plokhotnyuk/jsoniter-scala/jsoniter-scala-core_2.13/2.13.5.2/jsoniter-scala-core_2.13-2.13.5.2.jar\";  sha256 = \"007is0h29nn07ggkhrsn85jj6ffrdvxjr3f2b8xqlhf6blrzbnc6\";  organization = \"Organization(com.github.plokhotnyuk.jsoniter-scala)\";  module = \"Artifact(jsoniter-scala-core_2.13)\";  version = \"Version(2.13.5.2)\";  m2RepoPath = \"com/github/plokhotnyuk/jsoniter-scala/jsoniter-scala-core_2.13/2.13.5.2/jsoniter-scala-core_2.13-2.13.5.2.jar\";  filename = \"jsoniter-scala-core_2.13-2.13.5.2.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-core_2.13/2.1.4/coursier-core_2.13-2.1.4.jar\";  sha256 = \"1mx433g3i57980hdg5lyf6h7ygdkgm96b284q66bjab523jgp29w\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-core_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-core_2.13/2.1.4/coursier-core_2.13-2.1.4.jar\";  filename = \"coursier-core_2.13-2.1.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-proxy-setup/2.1.4/coursier-proxy-setup-2.1.4.jar\";  sha256 = \"154ba9c8fk5fh4qcj4gzarbf8l6j9wd4dnfxavhwfnjs8nz81f0p\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-proxy-setup)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-proxy-setup/2.1.4/coursier-proxy-setup-2.1.4.jar\";  filename = \"coursier-proxy-setup-2.1.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/get-coursier/jniutils/windows-jni-utils/0.3.3/windows-jni-utils-0.3.3.jar\";  sha256 = \"1rm7qf53zv24pd6f8zj6dg0c1zkzic8dhf5j0w0f4m932v7yys5b\";  organization = \"Organization(io.get-coursier.jniutils)\";  module = \"Artifact(windows-jni-utils)\";  version = \"Version(0.3.3)\";  m2RepoPath = \"io/get-coursier/jniutils/windows-jni-utils/0.3.3/windows-jni-utils-0.3.3.jar\";  filename = \"windows-jni-utils-0.3.3.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-archiver/4.7.1/plexus-archiver-4.7.1.jar\";  sha256 = \"166adl7ggcg0npndf8dwsrndvjzybiiahxb1ym8szn8pqrxzhiq1\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-archiver)\";  version = \"Version(4.7.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-archiver/4.7.1/plexus-archiver-4.7.1.jar\";  filename = \"plexus-archiver-4.7.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-container-default/2.1.1/plexus-container-default-2.1.1.jar\";  sha256 = \"1rqwkqcqqbmh7g4jq5r41db4wc166kdsw7gcd4d9lrna84788rcb\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-container-default)\";  version = \"Version(2.1.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-container-default/2.1.1/plexus-container-default-2.1.1.jar\";  filename = \"plexus-container-default-2.1.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/virtuslab/scala-cli/config_2.13/0.2.1/config_2.13-0.2.1.jar\";  sha256 = \"09lnd59xz9256890xi9x3qfbxbj1y9g9k7dcvavl2sbdhy17cmp9\";  organization = \"Organization(org.virtuslab.scala-cli)\";  module = \"Artifact(config_2.13)\";  version = \"Version(0.2.1)\";  m2RepoPath = \"org/virtuslab/scala-cli/config_2.13/0.2.1/config_2.13-0.2.1.jar\";  filename = \"config_2.13-0.2.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/github/alexarchambault/windows-ansi/windows-ansi/0.0.5/windows-ansi-0.0.5.jar\";  sha256 = \"0s8zqjj9rk8hjyx7ci4n16x0557f8i2nmcv5j75d8w4l361b1b7r\";  organization = \"Organization(io.github.alexarchambault.windows-ansi)\";  module = \"Artifact(windows-ansi)\";  version = \"Version(0.0.5)\";  m2RepoPath = \"io/github/alexarchambault/windows-ansi/windows-ansi/0.0.5/windows-ansi-0.0.5.jar\";  filename = \"windows-ansi-0.0.5.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-util_2.13/2.1.4/coursier-util_2.13-2.1.4.jar\";  sha256 = \"1lsl83qhdyrd14jwq9sww0ajwqnqiiawv1kgqvjl3wh39lw1cap1\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-util_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-util_2.13/2.1.4/coursier-util_2.13-2.1.4.jar\";  filename = \"coursier-util_2.13-2.1.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/model/core_3/1.5.5/core_3-1.5.5.jar\";  sha256 = \"1cl6v44p60p9imvfp4gcfz409b7fxi544vap0zqrla6cx6dbh9k0\";  organization = \"Organization(com.softwaremill.sttp.model)\";  module = \"Artifact(core_3)\";  version = \"Version(1.5.5)\";  m2RepoPath = \"com/softwaremill/sttp/model/core_3/1.5.5/core_3-1.5.5.jar\";  filename = \"core_3-1.5.5.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/core_3/1.3.13/core_3-1.3.13.jar\";  sha256 = \"1mw14g3hzgfw13h9rcfiqd5m3asakn4arx33wrnslrd91n8qq3qx\";  organization = \"Organization(com.softwaremill.sttp.shared)\";  module = \"Artifact(core_3)\";  version = \"Version(1.3.13)\";  m2RepoPath = \"com/softwaremill/sttp/shared/core_3/1.3.13/core_3-1.3.13.jar\";  filename = \"core_3-1.3.13.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/ws_3/1.3.13/ws_3-1.3.13.jar\";  sha256 = \"12vm2vgpwgi8d5n0c9lyj63b8hg6fbb0mnk1dqp7zz23q0hmd6pz\";  organization = \"Organization(com.softwaremill.sttp.shared)\";  module = \"Artifact(ws_3)\";  version = \"Version(1.3.13)\";  m2RepoPath = \"com/softwaremill/sttp/shared/ws_3/1.3.13/ws_3-1.3.13.jar\";  filename = \"ws_3-1.3.13.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/lihaoyi/sourcecode_3/0.3.0/sourcecode_3-0.3.0.jar\";  sha256 = \"0x4jqacywh8bv03xcygzr8lwdwcgxmdkbilf6m13zjm6bm9gq3hq\";  organization = \"Organization(com.lihaoyi)\";  module = \"Artifact(sourcecode_3)\";  version = \"Version(0.3.0)\";  m2RepoPath = \"com/lihaoyi/sourcecode_3/0.3.0/sourcecode_3-0.3.0.jar\";  filename = \"sourcecode_3-0.3.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/lihaoyi/geny_3/1.0.0/geny_3-1.0.0.jar\";  sha256 = \"184ic42v9q0syjv58hs47cpd5g8mda4b6wagbw6w42gw57r3vp00\";  organization = \"Organization(com.lihaoyi)\";  module = \"Artifact(geny_3)\";  version = \"Version(1.0.0)\";  m2RepoPath = \"com/lihaoyi/geny_3/1.0.0/geny_3-1.0.0.jar\";  filename = \"geny_3-1.0.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-sync-shared_3/1.0.0-20240120_1020_master/a8-sync-shared_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"1qq84857j9vdcab0kww4jr82gn4p3rjl8f5j84d6dswd2yxfin81\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-sync-shared_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-sync-shared_3/1.0.0-20240120_1020_master/a8-sync-shared_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-sync-shared_3-1.0.0-20240120_1020_master.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio_3/2.0.19/zio_3-2.0.19.jar\";  sha256 = \"1n21jmjd18fd7qb93b4kj9is7cl998idx0azvladjrqrajsj5axx\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio_3/2.0.19/zio_3-2.0.19.jar\";  filename = \"zio_3-2.0.19.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-streams_3/2.0.19/zio-streams_3-2.0.19.jar\";  sha256 = \"1dcgk3h14fs5j4dzq8yd4nxjyqc2hz3mj6zyznlz3jy5zcwsxyap\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-streams_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio-streams_3/2.0.19/zio-streams_3-2.0.19.jar\";  filename = \"zio-streams_3-2.0.19.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-collection-compat_3/2.9.0/scala-collection-compat_3-2.9.0.jar\";  sha256 = \"072b593rv78mh055a4zn1wp78f2w9mcfknwjy8a95ns24k414max\";  organization = \"Organization(org.scala-lang.modules)\";  module = \"Artifact(scala-collection-compat_3)\";  version = \"Version(2.9.0)\";  m2RepoPath = \"org/scala-lang/modules/scala-collection-compat_3/2.9.0/scala-collection-compat_3-2.9.0.jar\";  filename = \"scala-collection-compat_3-2.9.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/cats-core_3/2.9.0/cats-core_3-2.9.0.jar\";  sha256 = \"1kgd5cjkjk7x7g1ls1klnwl87xwi9h2h3iwlqcq1bkl3kndy93qm\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(cats-core_3)\";  version = \"Version(2.9.0)\";  m2RepoPath = \"org/typelevel/cats-core_3/2.9.0/cats-core_3-2.9.0.jar\";  filename = \"cats-core_3-2.9.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/http-client-spi/2.19.6/http-client-spi-2.19.6.jar\";  sha256 = \"17dxqc13vp75r8ada4dfn542ajybh7iabqz7n2c9xikq4bg2b3bl\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(http-client-spi)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/http-client-spi/2.19.6/http-client-spi-2.19.6.jar\";  filename = \"http-client-spi-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/metrics-spi/2.19.6/metrics-spi-2.19.6.jar\";  sha256 = \"1q1y7j94h93mdim6l5mgm5dn6ma8nr806isp8wph2j7izhllvnik\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(metrics-spi)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/metrics-spi/2.19.6/metrics-spi-2.19.6.jar\";  filename = \"metrics-spi-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/utils/2.19.6/utils-2.19.6.jar\";  sha256 = \"0pdnnv25qp92db8adfm9krmq9ag553qf2yqf4j8z4h5vs3ycsml3\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(utils)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/utils/2.19.6/utils-2.19.6.jar\";  filename = \"utils-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/annotations/2.19.6/annotations-2.19.6.jar\";  sha256 = \"1plwv5nsqyvryn2jkwf50i2nkvqq0kq8mr490285wlp22zljww77\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(annotations)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/annotations/2.19.6/annotations-2.19.6.jar\";  filename = \"annotations-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar\";  sha256 = \"0hzp3vrxbnyc6w86v671wp0zchb634rgrwwcc00m0skcarm05sbg\";  organization = \"Organization(org.apache.httpcomponents)\";  module = \"Artifact(httpclient)\";  version = \"Version(4.5.13)\";  m2RepoPath = \"org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar\";  filename = \"httpclient-4.5.13.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.jar\";  sha256 = \"091lnk100aqdg2bwbyg8rnp64dyfpz6kgicylg7my92317a8jvp0\";  organization = \"Organization(org.apache.httpcomponents)\";  module = \"Artifact(httpcore)\";  version = \"Version(4.4.13)\";  m2RepoPath = \"org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.jar\";  filename = \"httpcore-4.4.13.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-xml-protocol/2.19.6/aws-xml-protocol-2.19.6.jar\";  sha256 = \"0dzv0wn6k71gzsym73lm1h38ajpsil940cj8hlmgbvi22b8a4fl7\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(aws-xml-protocol)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/aws-xml-protocol/2.19.6/aws-xml-protocol-2.19.6.jar\";  filename = \"aws-xml-protocol-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/protocol-core/2.19.6/protocol-core-2.19.6.jar\";  sha256 = \"14si82i7vqbmrpg4fcykd8qvz952lr6fy9dqdjjgdb46vc26jzzy\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(protocol-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/protocol-core/2.19.6/protocol-core-2.19.6.jar\";  filename = \"protocol-core-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/sdk-core/2.19.6/sdk-core-2.19.6.jar\";  sha256 = \"1jn8mych9a1mjm175nhw1jvppr4c4imjs56glh9sbc9bd5x4sl1v\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(sdk-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/sdk-core/2.19.6/sdk-core-2.19.6.jar\";  filename = \"sdk-core-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/auth/2.19.6/auth-2.19.6.jar\";  sha256 = \"1gl6aazg3w1nmh5dw35rpanx6hbynvkglj116pja6pdygv3a4qxa\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(auth)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/auth/2.19.6/auth-2.19.6.jar\";  filename = \"auth-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/regions/2.19.6/regions-2.19.6.jar\";  sha256 = \"1acy3440fmjzq9a0wi5pmx6w19c9jpgh0sfygjiv65z45g7bh30r\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(regions)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/regions/2.19.6/regions-2.19.6.jar\";  filename = \"regions-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-core/2.19.6/aws-core-2.19.6.jar\";  sha256 = \"05wd8pizpj926zbd234cl1cwzhjhxfyp1j51k4xk9rgdr3ip8n08\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(aws-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/aws-core/2.19.6/aws-core-2.19.6.jar\";  filename = \"aws-core-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/json-utils/2.19.6/json-utils-2.19.6.jar\";  sha256 = \"00y4rbnahsa24asm8l2d0qbccvld70m26wdw0vr33lm1smzalgdz\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(json-utils)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/json-utils/2.19.6/json-utils-2.19.6.jar\";  filename = \"json-utils-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/endpoints-spi/2.19.6/endpoints-spi-2.19.6.jar\";  sha256 = \"0i9yc2szqhyxbfm9lkgn2kjyg0v4kf821rrmmpcd9bd7bsj75881\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(endpoints-spi)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/endpoints-spi/2.19.6/endpoints-spi-2.19.6.jar\";  filename = \"endpoints-spi-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/netty-nio-client/2.19.6/netty-nio-client-2.19.6.jar\";  sha256 = \"1r92jv12w52v1p9p6bxgraskbaxpdh6nyhraha02hlf4pp158npn\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(netty-nio-client)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/netty-nio-client/2.19.6/netty-nio-client-2.19.6.jar\";  filename = \"netty-nio-client-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/github/alexarchambault/concurrent-reference-hash-map/1.1.0/concurrent-reference-hash-map-1.1.0.jar\";  sha256 = \"0q9g18p1sgb4pzqpv91l7qss30a6rirjxjywzzzbkbq94ac0f9sm\";  organization = \"Organization(io.github.alexarchambault)\";  module = \"Artifact(concurrent-reference-hash-map)\";  version = \"Version(1.1.0)\";  m2RepoPath = \"io/github/alexarchambault/concurrent-reference-hash-map/1.1.0/concurrent-reference-hash-map-1.1.0.jar\";  filename = \"concurrent-reference-hash-map-1.1.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/javax/inject/javax.inject/1/javax.inject-1.jar\";  sha256 = \"1zz7gnahy2352345411rjlhsf64ikkc6z49dqcv1cj0clm271iwi\";  organization = \"Organization(javax.inject)\";  module = \"Artifact(javax.inject)\";  version = \"Version(1)\";  m2RepoPath = \"javax/inject/javax.inject/1/javax.inject-1.jar\";  filename = \"javax.inject-1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar\";  sha256 = \"0yx097fvfzbf68kv3svxyjfngfz84hqz3mryhfs637479ifjbq46\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-utils)\";  version = \"Version(3.5.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar\";  filename = \"plexus-utils-3.5.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-io/3.4.1/plexus-io-3.4.1.jar\";  sha256 = \"1i621m8m3wa7g38ryckvpihcbkzi13gqznsdc1b8dyb855yf0fxc\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-io)\";  version = \"Version(3.4.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-io/3.4.1/plexus-io-3.4.1.jar\";  filename = \"plexus-io-3.4.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar\";  sha256 = \"020946yakki3qzc652arfndzi594drxanidz9bawbb6vhxnjy6wn\";  organization = \"Organization(commons-io)\";  module = \"Artifact(commons-io)\";  version = \"Version(2.11.0)\";  m2RepoPath = \"commons-io/commons-io/2.11.0/commons-io-2.11.0.jar\";  filename = \"commons-io-2.11.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar\";  sha256 = \"11xpslyspx2yhslvcb7zbifb30kwrafz5dvq9lmndvz9c1qz2ry2\";  organization = \"Organization(org.apache.commons)\";  module = \"Artifact(commons-compress)\";  version = \"Version(1.23.0)\";  m2RepoPath = \"org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar\";  filename = \"commons-compress-1.23.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar\";  sha256 = \"0v1b7iydpnh2rvyzqvqbqm19vr2qva8icq84690bppnpr06r6608\";  organization = \"Organization(org.slf4j)\";  module = \"Artifact(slf4j-api)\";  version = \"Version(2.0.9)\";  m2RepoPath = \"org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar\";  filename = \"slf4j-api-2.0.9.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/iq80/snappy/snappy/0.4/snappy-0.4.jar\";  sha256 = \"1jds257xy63x383vb1dziafv9ziq0z9f9xhz7q3ddsaca1ywi826\";  organization = \"Organization(org.iq80.snappy)\";  module = \"Artifact(snappy)\";  version = \"Version(0.4)\";  m2RepoPath = \"org/iq80/snappy/snappy/0.4/snappy-0.4.jar\";  filename = \"snappy-0.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/tukaani/xz/1.9/xz-1.9.jar\";  sha256 = \"1r9mymavi6w85zbn0zfpxs4m535sfnpxv8x0ydnzky24zin306r1\";  organization = \"Organization(org.tukaani)\";  module = \"Artifact(xz)\";  version = \"Version(1.9)\";  m2RepoPath = \"org/tukaani/xz/1.9/xz-1.9.jar\";  filename = \"xz-1.9.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/github/luben/zstd-jni/1.5.5-2/zstd-jni-1.5.5-2.jar\";  sha256 = \"0nw239vhgwg16w590qjqmfvgdwa462kha1mplqnw45wgcj5hqk18\";  organization = \"Organization(com.github.luben)\";  module = \"Artifact(zstd-jni)\";  version = \"Version(1.5.5-2)\";  m2RepoPath = \"com/github/luben/zstd-jni/1.5.5-2/zstd-jni-1.5.5-2.jar\";  filename = \"zstd-jni-1.5.5-2.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar\";  sha256 = \"0j9m9zbw152gdqvigwh2l922z4nrxzbdbgky86f7qy4zqig7rxsj\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-classworlds)\";  version = \"Version(2.6.0)\";  m2RepoPath = \"org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar\";  filename = \"plexus-classworlds-2.6.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar\";  sha256 = \"1jr92qyx5dmr7sr53vq96a7frxq00yb828pk49kzhsd6nndmwkhh\";  organization = \"Organization(org.apache.xbean)\";  module = \"Artifact(xbean-reflect)\";  version = \"Version(3.7)\";  m2RepoPath = \"org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar\";  filename = \"xbean-reflect-3.7.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar\";  sha256 = \"17qbzl9h7cr7b2ry4y9jyni8cnmg2andg4ya53xv5mrx6a8iknbc\";  organization = \"Organization(org.fusesource.jansi)\";  module = \"Artifact(jansi)\";  version = \"Version(2.4.0)\";  m2RepoPath = \"org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar\";  filename = \"jansi-2.4.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-logging-logback_3/1.0.0-20240120_1020_master/a8-logging-logback_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"0a6znq59wkgi1mipghma9gvs6rvy8karxrvpd4nlcalsic5z241a\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-logging-logback_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-logging-logback_3/1.0.0-20240120_1020_master/a8-logging-logback_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-logging-logback_3-1.0.0-20240120_1020_master.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/case-insensitive_3/1.3.0/case-insensitive_3-1.3.0.jar\";  sha256 = \"109n13dbwlfmzirs1vlilw5x5g41z2xsrk9ahcbd2ffp9ispsb7z\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(case-insensitive_3)\";  version = \"Version(1.3.0)\";  m2RepoPath = \"org/typelevel/case-insensitive_3/1.3.0/case-insensitive_3-1.3.0.jar\";  filename = \"case-insensitive_3-1.3.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/beachape/enumeratum_3/1.7.2/enumeratum_3-1.7.2.jar\";  sha256 = \"0jrm1pg41qy7y14n2x5nbms8w7rfnl7dyzpa7x0n4cq8iba0iwsz\";  organization = \"Organization(com.beachape)\";  module = \"Artifact(enumeratum_3)\";  version = \"Version(1.7.2)\";  m2RepoPath = \"com/beachape/enumeratum_3/1.7.2/enumeratum_3-1.7.2.jar\";  filename = \"enumeratum_3-1.7.2.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/jawn-parser_3/1.4.0/jawn-parser_3-1.4.0.jar\";  sha256 = \"0zx4vg31sj3vmq1xqar93bccx86bkhgpvx61rh8xx68sjgm45wiy\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(jawn-parser_3)\";  version = \"Version(1.4.0)\";  m2RepoPath = \"org/typelevel/jawn-parser_3/1.4.0/jawn-parser_3-1.4.0.jar\";  filename = \"jawn-parser_3-1.4.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/jawn-ast_3/1.4.0/jawn-ast_3-1.4.0.jar\";  sha256 = \"1s8n4wp120qphw0fqpybiy5izk7cyyai1dih6p2dfy0y68v086h7\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(jawn-ast_3)\";  version = \"Version(1.4.0)\";  m2RepoPath = \"org/typelevel/jawn-ast_3/1.4.0/jawn-ast_3-1.4.0.jar\";  filename = \"jawn-ast_3-1.4.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-prelude_3/1.0.0-RC16/zio-prelude_3-1.0.0-RC16.jar\";  sha256 = \"0mxfdr412jz0l9355zaqggssw6syv0wnyswjmxvlpndydb5qznn4\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-prelude_3)\";  version = \"Version(1.0.0-RC16)\";  m2RepoPath = \"dev/zio/zio-prelude_3/1.0.0-RC16/zio-prelude_3-1.0.0-RC16.jar\";  filename = \"zio-prelude_3-1.0.0-RC16.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/client3/zio_3/3.8.11/zio_3-3.8.11.jar\";  sha256 = \"123xv7d16jwxxafli1vfgw38pmnkcasqwdwjls4bhd6h9qkpxdag\";  organization = \"Organization(com.softwaremill.sttp.client3)\";  module = \"Artifact(zio_3)\";  version = \"Version(3.8.11)\";  m2RepoPath = \"com/softwaremill/sttp/client3/zio_3/3.8.11/zio_3-3.8.11.jar\";  filename = \"zio_3-3.8.11.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/hsqldb/hsqldb/2.7.1/hsqldb-2.7.1.jar\";  sha256 = \"1jjkbqii4rd1724ayfkc0x5s4nvg10zx085zrsgvzfjq9hm579dw\";  organization = \"Organization(org.hsqldb)\";  module = \"Artifact(hsqldb)\";  version = \"Version(2.7.1)\";  m2RepoPath = \"org/hsqldb/hsqldb/2.7.1/hsqldb-2.7.1.jar\";  filename = \"hsqldb-2.7.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-cache_3/0.2.2/zio-cache_3-0.2.2.jar\";  sha256 = \"1idlbs2r7lcsgn7yq6kx4clvsahmhmr464si25nnkjkqkln8228b\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-cache_3)\";  version = \"Version(0.2.2)\";  m2RepoPath = \"dev/zio/zio-cache_3/0.2.2/zio-cache_3-0.2.2.jar\";  filename = \"zio-cache_3-0.2.2.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/github/andyglow/typesafe-config-scala_3/2.0.0/typesafe-config-scala_3-2.0.0.jar\";  sha256 = \"0zkk6gb43k32g9yanxgijw8a37c4cdf3xn8j8ch977jlfdfc51ia\";  organization = \"Organization(com.github.andyglow)\";  module = \"Artifact(typesafe-config-scala_3)\";  version = \"Version(2.0.0)\";  m2RepoPath = \"com/github/andyglow/typesafe-config-scala_3/2.0.0/typesafe-config-scala_3-2.0.0.jar\";  filename = \"typesafe-config-scala_3-2.0.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/postgresql/postgresql/42.5.3/postgresql-42.5.3.jar\";  sha256 = \"1gjhicbnmwiaw04qmadmhjfws4dldhgdgdgjnhw5dlgv1f19p5an\";  organization = \"Organization(org.postgresql)\";  module = \"Artifact(postgresql)\";  version = \"Version(42.5.3)\";  m2RepoPath = \"org/postgresql/postgresql/42.5.3/postgresql-42.5.3.jar\";  filename = \"postgresql-42.5.3.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/net/sf/jt400/jt400/11.1/jt400-11.1.jar\";  sha256 = \"1i5w7gxvvszqq2nivb75202i08rnjx5kbfqxf4lbpfa9vf1hd4a5\";  organization = \"Organization(net.sf.jt400)\";  module = \"Artifact(jt400)\";  version = \"Version(11.1)\";  m2RepoPath = \"net/sf/jt400/jt400/11.1/jt400-11.1.jar\";  filename = \"jt400-11.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar\";  sha256 = \"0arsdd1raxamnh42rpbzhbjsyis0y2dr3a1pcwlv8xb7gqwr5m16\";  organization = \"Organization(com.zaxxer)\";  module = \"Artifact(HikariCP)\";  version = \"Version(5.0.1)\";  m2RepoPath = \"com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar\";  filename = \"HikariCP-5.0.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/sun/mail/jakarta.mail/2.0.1/jakarta.mail-2.0.1.jar\";  sha256 = \"08ycjh20wgz0h88g827pchxqy9fj7lwj77hpnwyigvi2x6yvv249\";  organization = \"Organization(com.sun.mail)\";  module = \"Artifact(jakarta.mail)\";  version = \"Version(2.0.1)\";  m2RepoPath = \"com/sun/mail/jakarta.mail/2.0.1/jakarta.mail-2.0.1.jar\";  filename = \"jakarta.mail-2.0.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-internal-macros_3/2.0.19/zio-internal-macros_3-2.0.19.jar\";  sha256 = \"15zzklp8w7fcmkfd4h3zzrlvm5g7ls51zighmhxdk6smgv5xlhs0\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-internal-macros_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio-internal-macros_3/2.0.19/zio-internal-macros_3-2.0.19.jar\";  filename = \"zio-internal-macros_3-2.0.19.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-stacktracer_3/2.0.19/zio-stacktracer_3-2.0.19.jar\";  sha256 = \"0bny0hgrw4hm3d11qzpyxh2f14zpqk2j3adbp6ziqdci3b4ha8sw\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-stacktracer_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio-stacktracer_3/2.0.19/zio-stacktracer_3-2.0.19.jar\";  filename = \"zio-stacktracer_3-2.0.19.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/izumi-reflect_3/2.3.8/izumi-reflect_3-2.3.8.jar\";  sha256 = \"0w4pdnl8b6c97c1wng4nszic49wyr7jdfbll8hn7lc253v8wlhz3\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(izumi-reflect_3)\";  version = \"Version(2.3.8)\";  m2RepoPath = \"dev/zio/izumi-reflect_3/2.3.8/izumi-reflect_3-2.3.8.jar\";  filename = \"izumi-reflect_3-2.3.8.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/cats-kernel_3/2.9.0/cats-kernel_3-2.9.0.jar\";  sha256 = \"0xjskkd9dvfzaai5447wp96l7g6rbnzfivccv2i25f9mr0v2qdia\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(cats-kernel_3)\";  version = \"Version(2.9.0)\";  m2RepoPath = \"org/typelevel/cats-kernel_3/2.9.0/cats-kernel_3-2.9.0.jar\";  filename = \"cats-kernel_3-2.9.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar\";  sha256 = \"0a2z6ag51d4gb82kbnvjls7scd0h5snbjmqqyrcaqgcvg2bsap7p\";  organization = \"Organization(org.reactivestreams)\";  module = \"Artifact(reactive-streams)\";  version = \"Version(1.0.4)\";  m2RepoPath = \"org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar\";  filename = \"reactive-streams-1.0.4.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/commons-logging/commons-logging/1.2/commons-logging-1.2.jar\";  sha256 = \"0dm61zgmgjkg67kf9dyrzgpayd18r656n05kiabmc3xyl0gfmpfs\";  organization = \"Organization(commons-logging)\";  module = \"Artifact(commons-logging)\";  version = \"Version(1.2)\";  m2RepoPath = \"commons-logging/commons-logging/1.2/commons-logging-1.2.jar\";  filename = \"commons-logging-1.2.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/commons-codec/commons-codec/1.11/commons-codec-1.11.jar\";  sha256 = \"0zbv3psvznwx23iwirphvy0qhkpsdmz958in47s4ialpiqqxb6g5\";  organization = \"Organization(commons-codec)\";  module = \"Artifact(commons-codec)\";  version = \"Version(1.11)\";  m2RepoPath = \"commons-codec/commons-codec/1.11/commons-codec-1.11.jar\";  filename = \"commons-codec-1.11.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-query-protocol/2.19.6/aws-query-protocol-2.19.6.jar\";  sha256 = \"139jrfzlkm8bniripghfy94by0g4xcby2b8jjhkkc96nvpm3hcmi\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(aws-query-protocol)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/aws-query-protocol/2.19.6/aws-query-protocol-2.19.6.jar\";  filename = \"aws-query-protocol-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/profiles/2.19.6/profiles-2.19.6.jar\";  sha256 = \"0j1z2i4j2s387jawiasxfph51zngykx6iwk8vhrhj77l0mqs7d79\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(profiles)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/profiles/2.19.6/profiles-2.19.6.jar\";  filename = \"profiles-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/eventstream/eventstream/1.0.1/eventstream-1.0.1.jar\";  sha256 = \"08p8dk0p7v39lb1k9kig87x21syhn08826qr0b1h4zqijvkdhdqc\";  organization = \"Organization(software.amazon.eventstream)\";  module = \"Artifact(eventstream)\";  version = \"Version(1.0.1)\";  m2RepoPath = \"software/amazon/eventstream/eventstream/1.0.1/eventstream-1.0.1.jar\";  filename = \"eventstream-1.0.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/third-party-jackson-core/2.19.6/third-party-jackson-core-2.19.6.jar\";  sha256 = \"1jdk37g7gfvlxr0dr1w8ypx4pyl3bcc6ph5czaqlj985jxpb5z53\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(third-party-jackson-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/third-party-jackson-core/2.19.6/third-party-jackson-core-2.19.6.jar\";  filename = \"third-party-jackson-core-2.19.6.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-codec-http/4.1.86.Final/netty-codec-http-4.1.86.Final.jar\";  sha256 = \"110bqhibncw3qdj3zwlksmadnmyf40913dayaiq7pkyg28qynv1z\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-codec-http)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-codec-http/4.1.86.Final/netty-codec-http-4.1.86.Final.jar\";  filename = \"netty-codec-http-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-codec-http2/4.1.86.Final/netty-codec-http2-4.1.86.Final.jar\";  sha256 = \"0rxi3n0ghkdzgarixg10nk7qiws54297hiwhxnd9ifxnda7f5s78\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-codec-http2)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-codec-http2/4.1.86.Final/netty-codec-http2-4.1.86.Final.jar\";  filename = \"netty-codec-http2-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-codec/4.1.86.Final/netty-codec-4.1.86.Final.jar\";  sha256 = \"1sjv681nv6hxvx2q2141bnv6v4axmnlx2748mdnas7c5bh5q8mh4\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-codec)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-codec/4.1.86.Final/netty-codec-4.1.86.Final.jar\";  filename = \"netty-codec-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-transport/4.1.86.Final/netty-transport-4.1.86.Final.jar\";  sha256 = \"17rch35xh0p5iw664qlan07a6w1s8ixldx5lnd32p4p4ak6nswpn\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-transport)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-transport/4.1.86.Final/netty-transport-4.1.86.Final.jar\";  filename = \"netty-transport-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-common/4.1.86.Final/netty-common-4.1.86.Final.jar\";  sha256 = \"16dfqa7k9sj4jysjscza2dib7wsf5mqfg8wsabccaifdwwb3ynm3\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-common)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-common/4.1.86.Final/netty-common-4.1.86.Final.jar\";  filename = \"netty-common-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-buffer/4.1.86.Final/netty-buffer-4.1.86.Final.jar\";  sha256 = \"125y9ayiv26lxlbnd7mfykwxrnkxzpmkiq56zaqncll6gks1abp4\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-buffer)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-buffer/4.1.86.Final/netty-buffer-4.1.86.Final.jar\";  filename = \"netty-buffer-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-handler/4.1.86.Final/netty-handler-4.1.86.Final.jar\";  sha256 = \"0kf0w7xssjbk4bw7jn5mhia04m3wvxyif99fabf7ici954ll56z6\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-handler)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-handler/4.1.86.Final/netty-handler-4.1.86.Final.jar\";  filename = \"netty-handler-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-transport-classes-epoll/4.1.86.Final/netty-transport-classes-epoll-4.1.86.Final.jar\";  sha256 = \"1npda5dpk59waj2kqa1bdis8v7zh5nlp58cnsprlnssxv23ypirw\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-transport-classes-epoll)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-transport-classes-epoll/4.1.86.Final/netty-transport-classes-epoll-4.1.86.Final.jar\";  filename = \"netty-transport-classes-epoll-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-logging_3/1.0.0-20240120_1020_master/a8-logging_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"0m88wmz4raqnvwfhz7m7s23mbngkwadrplq5w7jjsxx17snh0sgi\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-logging_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-logging_3/1.0.0-20240120_1020_master/a8-logging_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-logging_3-1.0.0-20240120_1020_master.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/janino/janino/3.1.8/janino-3.1.8.jar\";  sha256 = \"0dvhmv7jzghhizgdlbh2rpla4vvqlkr1i86f0rrlmsd9fzysjf5x\";  organization = \"Organization(org.codehaus.janino)\";  module = \"Artifact(janino)\";  version = \"Version(3.1.8)\";  m2RepoPath = \"org/codehaus/janino/janino/3.1.8/janino-3.1.8.jar\";  filename = \"janino-3.1.8.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar\";  sha256 = \"18dcb0zkish2z0bmraxg82r7cjl1rfhij0a3fzpqgji4pmkp7vip\";  organization = \"Organization(ch.qos.logback)\";  module = \"Artifact(logback-core)\";  version = \"Version(1.4.11)\";  m2RepoPath = \"ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar\";  filename = \"logback-core-1.4.11.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar\";  sha256 = \"03jshlfsvfklhp34w3vsfcjdgh35wdj3h7pdd4lnbyjx3350z185\";  organization = \"Organization(ch.qos.logback)\";  module = \"Artifact(logback-classic)\";  version = \"Version(1.4.11)\";  m2RepoPath = \"ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar\";  filename = \"logback-classic-1.4.11.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/slf4j/jcl-over-slf4j/2.0.9/jcl-over-slf4j-2.0.9.jar\";  sha256 = \"1bq244qcihzm860yfpi6rq1hybagdxs0g9knxcm33jwv2yw1x3zr\";  organization = \"Organization(org.slf4j)\";  module = \"Artifact(jcl-over-slf4j)\";  version = \"Version(2.0.9)\";  m2RepoPath = \"org/slf4j/jcl-over-slf4j/2.0.9/jcl-over-slf4j-2.0.9.jar\";  filename = \"jcl-over-slf4j-2.0.9.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar\";  sha256 = \"1gq0dgbqs89f51ldh4igh1vmipcmxv0z46bx6ra6ygxxsgwfbd39\";  organization = \"Organization(org.slf4j)\";  module = \"Artifact(jul-to-slf4j)\";  version = \"Version(2.0.9)\";  m2RepoPath = \"org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar\";  filename = \"jul-to-slf4j-2.0.9.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/beachape/enumeratum-macros_3/1.6.3/enumeratum-macros_3-1.6.3.jar\";  sha256 = \"173jh1f7izx0y9svdckqv1cvp7g4k6immcczp9189jf1smpzs34k\";  organization = \"Organization(com.beachape)\";  module = \"Artifact(enumeratum-macros_3)\";  version = \"Version(1.6.3)\";  m2RepoPath = \"com/beachape/enumeratum-macros_3/1.6.3/enumeratum-macros_3-1.6.3.jar\";  filename = \"enumeratum-macros_3-1.6.3.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/typelevel/jawn-util_3/1.4.0/jawn-util_3-1.4.0.jar\";  sha256 = \"18h3341q1ipidrhfc758j1f9zq3zsmq1gzkvvbg0k9d20mz5hzla\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(jawn-util_3)\";  version = \"Version(1.4.0)\";  m2RepoPath = \"org/typelevel/jawn-util_3/1.4.0/jawn-util_3-1.4.0.jar\";  filename = \"jawn-util_3-1.4.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-prelude-macros_3/1.0.0-RC16/zio-prelude-macros_3-1.0.0-RC16.jar\";  sha256 = \"1vir1793m3b9bzk28vgclvl93lmyd8zjn1haa07jij57apc9a037\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-prelude-macros_3)\";  version = \"Version(1.0.0-RC16)\";  m2RepoPath = \"dev/zio/zio-prelude-macros_3/1.0.0-RC16/zio-prelude-macros_3-1.0.0-RC16.jar\";  filename = \"zio-prelude-macros_3-1.0.0-RC16.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/zio_3/1.3.13/zio_3-1.3.13.jar\";  sha256 = \"18gwl4sxq4s65ynvs43z8vbwz7ybdxvb5vi1h0ncnhb64s1k6a1p\";  organization = \"Organization(com.softwaremill.sttp.shared)\";  module = \"Artifact(zio_3)\";  version = \"Version(1.3.13)\";  m2RepoPath = \"com/softwaremill/sttp/shared/zio_3/1.3.13/zio_3-1.3.13.jar\";  filename = \"zio_3-1.3.13.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-interop-reactivestreams_3/2.0.0/zio-interop-reactivestreams_3-2.0.0.jar\";  sha256 = \"0m8dlrixcra0ps4nindj9zwm4wsvf6raj92f4hh3j0vx00mn0r6v\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-interop-reactivestreams_3)\";  version = \"Version(2.0.0)\";  m2RepoPath = \"dev/zio/zio-interop-reactivestreams_3/2.0.0/zio-interop-reactivestreams_3-2.0.0.jar\";  filename = \"zio-interop-reactivestreams_3-2.0.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/typesafe/config/1.4.1/config-1.4.1.jar\";  sha256 = \"13wl9iwx4vp6ikhf60z53q51861irpa87h8zqi08hp674giaf2jc\";  organization = \"Organization(com.typesafe)\";  module = \"Artifact(config)\";  version = \"Version(1.4.1)\";  m2RepoPath = \"com/typesafe/config/1.4.1/config-1.4.1.jar\";  filename = \"config-1.4.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar\";  sha256 = \"19556pzrqcwwmavx3yrbnm6b9kcbjnv3cf2pq9pn15cay6rr16bj\";  organization = \"Organization(org.checkerframework)\";  module = \"Artifact(checker-qual)\";  version = \"Version(3.5.0)\";  m2RepoPath = \"org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar\";  filename = \"checker-qual-3.5.0.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/mysql/mysql-connector-j/8.0.32/mysql-connector-j-8.0.32.jar\";  sha256 = \"1idc2df7djb85a9hh37z2ma38p944z95k6xqbqpg102rjbz2j8sj\";  organization = \"Organization(com.mysql)\";  module = \"Artifact(mysql-connector-j)\";  version = \"Version(8.0.32)\";  m2RepoPath = \"com/mysql/mysql-connector-j/8.0.32/mysql-connector-j-8.0.32.jar\";  filename = \"mysql-connector-j-8.0.32.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/sun/activation/jakarta.activation/2.0.1/jakarta.activation-2.0.1.jar\";  sha256 = \"0w986gsfpgfvibcdzqbq9nx6vj9h66z32rd95rb9ax70srylpqmr\";  organization = \"Organization(com.sun.activation)\";  module = \"Artifact(jakarta.activation)\";  version = \"Version(2.0.1)\";  m2RepoPath = \"com/sun/activation/jakarta.activation/2.0.1/jakarta.activation-2.0.1.jar\";  filename = \"jakarta.activation-2.0.1.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/izumi-reflect-thirdparty-boopickle-shaded_3/2.3.8/izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar\";  sha256 = \"1v26874ka7x0j30996k5avi2qwxffrq515iniscmyarwg3bd2ckc\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(izumi-reflect-thirdparty-boopickle-shaded_3)\";  version = \"Version(2.3.8)\";  m2RepoPath = \"dev/zio/izumi-reflect-thirdparty-boopickle-shaded_3/2.3.8/izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar\";  filename = \"izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-resolver/4.1.86.Final/netty-resolver-4.1.86.Final.jar\";  sha256 = \"1fpxrdmswr3jxfcsk03gc6wq2acy4rzkm4nq87f4693zklqa2a3n\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-resolver)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-resolver/4.1.86.Final/netty-resolver-4.1.86.Final.jar\";  filename = \"netty-resolver-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/io/netty/netty-transport-native-unix-common/4.1.86.Final/netty-transport-native-unix-common-4.1.86.Final.jar\";  sha256 = \"05gi681csblci58pj2r9gg23ykgffwv7jzwrgvar2msn0qxd09pc\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-transport-native-unix-common)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-transport-native-unix-common/4.1.86.Final/netty-transport-native-unix-common-4.1.86.Final.jar\";  filename = \"netty-transport-native-unix-common-4.1.86.Final.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-logging_3/2.1.15/zio-logging_3-2.1.15.jar\";  sha256 = \"1wxhxpvad5hc21g3ai7m91v2mqc8wia589mzq86ivlm7fkp4wmb7\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-logging_3)\";  version = \"Version(2.1.15)\";  m2RepoPath = \"dev/zio/zio-logging_3/2.1.15/zio-logging_3-2.1.15.jar\";  filename = \"zio-logging_3-2.1.15.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-logging-slf4j2_3/2.1.15/zio-logging-slf4j2_3-2.1.15.jar\";  sha256 = \"1903ndanaa266k0yrgwmiwgl7n7y47yhkixvl4b7rq3cqcb6g8y0\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-logging-slf4j2_3)\";  version = \"Version(2.1.15)\";  m2RepoPath = \"dev/zio/zio-logging-slf4j2_3/2.1.15/zio-logging-slf4j2_3-2.1.15.jar\";  filename = \"zio-logging-slf4j2_3-2.1.15.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/org/codehaus/janino/commons-compiler/3.1.8/commons-compiler-3.1.8.jar\";  sha256 = \"1vrf9si22kczh84fr7i7lw26vama173vvbh2fzlikxm6hnxm5cp7\";  organization = \"Organization(org.codehaus.janino)\";  module = \"Artifact(commons-compiler)\";  version = \"Version(3.1.8)\";  m2RepoPath = \"org/codehaus/janino/commons-compiler/3.1.8/commons-compiler-3.1.8.jar\";  filename = \"commons-compiler-3.1.8.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar\";  sha256 = \"1r01cdp5w97zgb7zwn2pyrcx9gznmv2qz3zzzpmjslbidakv8y0v\";  organization = \"Organization(com.google.protobuf)\";  module = \"Artifact(protobuf-java)\";  version = \"Version(3.21.9)\";  m2RepoPath = \"com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar\";  filename = \"protobuf-java-3.21.9.jar\";  }\n          { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-parser_3/0.1.9/zio-parser_3-0.1.9.jar\";  sha256 = \"1shij789vc4vkrdyjxzlkyzmzp24413iy3pmafijliccizl06hm9\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-parser_3)\";  version = \"Version(0.1.9)\";  m2RepoPath = \"dev/zio/zio-parser_3/0.1.9/zio-parser_3-0.1.9.jar\";  filename = \"zio-parser_3-0.1.9.jar\";  }\n        ];\n      };\n\n    webappExplode = if launcherConfig.webappExplode == null then false else launcherConfig.webappExplode;\n\n    fetcherFn = \n      dep: (\n        fetchurl {\n          url = dep.url;\n          sha256 = dep.sha256;\n        }\n      );\n\n    javaVersion = launcherConfig.javaVersion;\n\n    jdk = \n      if javaVersion == null then jdk11\n      else if javaVersion == \"8\" then jdk8\n      else if javaVersion == \"11\" then jdk11\n      else if javaVersion == \"17\" then jdk17\n      else abort(\"expected javaVersion = [ 8 | 11 | 17 ] got ${javaVersion}\")\n    ;\n\n    artifacts = map fetcherFn launcherConfig.dependencies;\n\n    linkFarmEntryFn = drv: { name = drv.name; path = drv; };\n\n    classpathBuilder = linkFarm launcherConfig.name (map linkFarmEntryFn artifacts);\n\n    args = builtins.concatStringsSep \" \" (launcherConfig.jvmArgs ++ [launcherConfig.mainClass] ++ launcherConfig.args);\n\n    webappExploder = \n      if webappExplode then\n        ''\n          echo exploding webapp-composite folder\n          for jar in ${classpathBuilder}/*.jar\n          do\n            ${unzip}/bin/unzip $jar \"webapp/*\" -d $out/webapp-composite 2> /dev/null 1> /dev/null || true\n          done\n        ''\n      else\n        \"\"\n    ;\n\n  in\n\n    stdenv.mkDerivation {\n      name = launcherConfig.name;\n      src = ./.;\n      installPhase = ''\n\n        mkdir -p $out/bin\n\n        # create link to jdk bin so that top and other tools show the process name as something meaningful\n        ln -s ${jdk}/bin/java $out/bin/${launcherConfig.name}j\n\n        # create link to lib folder derivation\n        ln -s ${classpathBuilder} $out/lib\n\n        LAUNCHER=$out/bin/${launcherConfig.name}\n\n        # setup launcher script\n        cp ./java-launcher-template $LAUNCHER\n        chmod +x $LAUNCHER\n        substituteInPlace $LAUNCHER \\\n          --replace _name_ ${launcherConfig.name} \\\n          --replace _out_ $out \\\n          --replace _args_ \"${args}\"\n\n      '' + webappExploder;\n    }\n"
+    },
+    {
+      "filename": "java-launcher-config.nix",
+      "contents": "{\n\n  name = \"a8-codegen\";\n  mainClass = \"a8.codegen.Codegen\";\n  jvmArgs = [];\n  args =  [];\n  repo = \"repo\";\n  organization = \"io.accur8\";\n  artifact = \"a8-versions_3\";\n  version = null;\n  branch = \"master\";\n  webappExplode = null;\n  javaVersion = null;\n\n  dependencies = [\n    { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-versions_3/1.0.0-20241022_1519_master/a8-versions_3-1.0.0-20241022_1519_master.jar\";  sha256 = \"0ifqy3ay4m9ngz4hzrlwxh0fmagcfrckwx2m3y6w4m9lb2dyp9a7\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-versions_3)\";  version = \"Version(1.0.0-20241022_1519_master)\";  m2RepoPath = \"io/accur8/a8-versions_3/1.0.0-20241022_1519_master/a8-versions_3-1.0.0-20241022_1519_master.jar\";  filename = \"a8-versions_3-1.0.0-20241022_1519_master.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/scala-lang/scala3-library_3/3.3.1/scala3-library_3-3.3.1.jar\";  sha256 = \"022maifz46v0cc01m6l8ysg7m3dkx44wriky8lij7b6iyg0i6k5n\";  organization = \"Organization(org.scala-lang)\";  module = \"Artifact(scala3-library_3)\";  version = \"Version(3.3.1)\";  m2RepoPath = \"org/scala-lang/scala3-library_3/3.3.1/scala3-library_3-3.3.1.jar\";  filename = \"scala3-library_3-3.3.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier_2.13/2.1.4/coursier_2.13-2.1.4.jar\";  sha256 = \"15xq477nx39qqlrr4785y82scdn336flpcfjna6397x58n973lw3\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier_2.13/2.1.4/coursier_2.13-2.1.4.jar\";  filename = \"coursier_2.13-2.1.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-cache_2.13/2.1.4/coursier-cache_2.13-2.1.4.jar\";  sha256 = \"12mc6cqyjzx4sdnj65qgm8mg1c4s0zhw14qpcy8vsx6xgziym2ff\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-cache_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-cache_2.13/2.1.4/coursier-cache_2.13-2.1.4.jar\";  filename = \"coursier-cache_2.13-2.1.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-xml_3/2.1.0/scala-xml_3-2.1.0.jar\";  sha256 = \"1kgfrfsflgw9imfh2by74c1d787hnza45k7fa1jisjszax1j7wj8\";  organization = \"Organization(org.scala-lang.modules)\";  module = \"Artifact(scala-xml_3)\";  version = \"Version(2.1.0)\";  m2RepoPath = \"org/scala-lang/modules/scala-xml_3/2.1.0/scala-xml_3-2.1.0.jar\";  filename = \"scala-xml_3-2.1.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/client3/core_3/3.8.15/core_3-3.8.15.jar\";  sha256 = \"09wkfzzy7y1yl2828v3xhkyzkvwqm2mpgdxfm5ggl0ccxvza3r2n\";  organization = \"Organization(com.softwaremill.sttp.client3)\";  module = \"Artifact(core_3)\";  version = \"Version(3.8.15)\";  m2RepoPath = \"com/softwaremill/sttp/client3/core_3/3.8.15/core_3-3.8.15.jar\";  filename = \"core_3-3.8.15.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/lihaoyi/fastparse_3/3.0.1/fastparse_3-3.0.1.jar\";  sha256 = \"0mzgfg4lsivkh02is49vlqq4fi6hs2xhs3bmpp2n7g08jkcv4wfn\";  organization = \"Organization(com.lihaoyi)\";  module = \"Artifact(fastparse_3)\";  version = \"Version(3.0.1)\";  m2RepoPath = \"com/lihaoyi/fastparse_3/3.0.1/fastparse_3-3.0.1.jar\";  filename = \"fastparse_3-3.0.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-sync-api_3/1.0.0-20240120_1020_master/a8-sync-api_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"00np9804wkv6yn3xj3giwlns9ygpkvvcmsjl1bhphh3akrd993ln\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-sync-api_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-sync-api_3/1.0.0-20240120_1020_master/a8-sync-api_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-sync-api_3-1.0.0-20240120_1020_master.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/rogach/scallop_3/4.1.0/scallop_3-4.1.0.jar\";  sha256 = \"1i7c2pa2s8rjry8n2kk2mdavfrcdckzw7vvd3q2z4gsm9rmi9r0w\";  organization = \"Organization(org.rogach)\";  module = \"Artifact(scallop_3)\";  version = \"Version(4.1.0)\";  m2RepoPath = \"org/rogach/scallop_3/4.1.0/scallop_3-4.1.0.jar\";  filename = \"scallop_3-4.1.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-process_3/0.7.2/zio-process_3-0.7.2.jar\";  sha256 = \"13rcvlza2gh99j0cskbmv1axvcvjbag59wkjilfn65dfqggk2bn5\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-process_3)\";  version = \"Version(0.7.2)\";  m2RepoPath = \"dev/zio/zio-process_3/0.7.2/zio-process_3-0.7.2.jar\";  filename = \"zio-process_3-0.7.2.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/cats-parse_3/0.3.9/cats-parse_3-0.3.9.jar\";  sha256 = \"08c3ky6r6qn0ypfgxmq08mbdysmm6ni5yjny4zsl017k2r8hi1vd\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(cats-parse_3)\";  version = \"Version(0.3.9)\";  m2RepoPath = \"org/typelevel/cats-parse_3/0.3.9/cats-parse_3-0.3.9.jar\";  filename = \"cats-parse_3-0.3.9.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/apache-client/2.19.6/apache-client-2.19.6.jar\";  sha256 = \"17nn1b5670mkbs2zxv67540iy8z2ky98zh0rshvc3iv0c559p5w6\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(apache-client)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/apache-client/2.19.6/apache-client-2.19.6.jar\";  filename = \"apache-client-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/route53/2.19.6/route53-2.19.6.jar\";  sha256 = \"03l6k7b979yp6xw6cmckngkwg7m9glsb49xdrrswz40i6y86jxkk\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(route53)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/route53/2.19.6/route53-2.19.6.jar\";  filename = \"route53-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/scala-lang/scala-library/2.13.10/scala-library-2.13.10.jar\";  sha256 = \"1hdivpz604rk4xnnzgz82viric4b3z778cxg73xfh0yf7xy61jp6\";  organization = \"Organization(org.scala-lang)\";  module = \"Artifact(scala-library)\";  version = \"Version(2.13.10)\";  m2RepoPath = \"org/scala-lang/scala-library/2.13.10/scala-library-2.13.10.jar\";  filename = \"scala-library-2.13.10.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/github/plokhotnyuk/jsoniter-scala/jsoniter-scala-core_2.13/2.13.5.2/jsoniter-scala-core_2.13-2.13.5.2.jar\";  sha256 = \"007is0h29nn07ggkhrsn85jj6ffrdvxjr3f2b8xqlhf6blrzbnc6\";  organization = \"Organization(com.github.plokhotnyuk.jsoniter-scala)\";  module = \"Artifact(jsoniter-scala-core_2.13)\";  version = \"Version(2.13.5.2)\";  m2RepoPath = \"com/github/plokhotnyuk/jsoniter-scala/jsoniter-scala-core_2.13/2.13.5.2/jsoniter-scala-core_2.13-2.13.5.2.jar\";  filename = \"jsoniter-scala-core_2.13-2.13.5.2.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-core_2.13/2.1.4/coursier-core_2.13-2.1.4.jar\";  sha256 = \"1mx433g3i57980hdg5lyf6h7ygdkgm96b284q66bjab523jgp29w\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-core_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-core_2.13/2.1.4/coursier-core_2.13-2.1.4.jar\";  filename = \"coursier-core_2.13-2.1.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-proxy-setup/2.1.4/coursier-proxy-setup-2.1.4.jar\";  sha256 = \"154ba9c8fk5fh4qcj4gzarbf8l6j9wd4dnfxavhwfnjs8nz81f0p\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-proxy-setup)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-proxy-setup/2.1.4/coursier-proxy-setup-2.1.4.jar\";  filename = \"coursier-proxy-setup-2.1.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/get-coursier/jniutils/windows-jni-utils/0.3.3/windows-jni-utils-0.3.3.jar\";  sha256 = \"1rm7qf53zv24pd6f8zj6dg0c1zkzic8dhf5j0w0f4m932v7yys5b\";  organization = \"Organization(io.get-coursier.jniutils)\";  module = \"Artifact(windows-jni-utils)\";  version = \"Version(0.3.3)\";  m2RepoPath = \"io/get-coursier/jniutils/windows-jni-utils/0.3.3/windows-jni-utils-0.3.3.jar\";  filename = \"windows-jni-utils-0.3.3.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-archiver/4.7.1/plexus-archiver-4.7.1.jar\";  sha256 = \"166adl7ggcg0npndf8dwsrndvjzybiiahxb1ym8szn8pqrxzhiq1\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-archiver)\";  version = \"Version(4.7.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-archiver/4.7.1/plexus-archiver-4.7.1.jar\";  filename = \"plexus-archiver-4.7.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-container-default/2.1.1/plexus-container-default-2.1.1.jar\";  sha256 = \"1rqwkqcqqbmh7g4jq5r41db4wc166kdsw7gcd4d9lrna84788rcb\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-container-default)\";  version = \"Version(2.1.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-container-default/2.1.1/plexus-container-default-2.1.1.jar\";  filename = \"plexus-container-default-2.1.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/virtuslab/scala-cli/config_2.13/0.2.1/config_2.13-0.2.1.jar\";  sha256 = \"09lnd59xz9256890xi9x3qfbxbj1y9g9k7dcvavl2sbdhy17cmp9\";  organization = \"Organization(org.virtuslab.scala-cli)\";  module = \"Artifact(config_2.13)\";  version = \"Version(0.2.1)\";  m2RepoPath = \"org/virtuslab/scala-cli/config_2.13/0.2.1/config_2.13-0.2.1.jar\";  filename = \"config_2.13-0.2.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/github/alexarchambault/windows-ansi/windows-ansi/0.0.5/windows-ansi-0.0.5.jar\";  sha256 = \"0s8zqjj9rk8hjyx7ci4n16x0557f8i2nmcv5j75d8w4l361b1b7r\";  organization = \"Organization(io.github.alexarchambault.windows-ansi)\";  module = \"Artifact(windows-ansi)\";  version = \"Version(0.0.5)\";  m2RepoPath = \"io/github/alexarchambault/windows-ansi/windows-ansi/0.0.5/windows-ansi-0.0.5.jar\";  filename = \"windows-ansi-0.0.5.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/get-coursier/coursier-util_2.13/2.1.4/coursier-util_2.13-2.1.4.jar\";  sha256 = \"1lsl83qhdyrd14jwq9sww0ajwqnqiiawv1kgqvjl3wh39lw1cap1\";  organization = \"Organization(io.get-coursier)\";  module = \"Artifact(coursier-util_2.13)\";  version = \"Version(2.1.4)\";  m2RepoPath = \"io/get-coursier/coursier-util_2.13/2.1.4/coursier-util_2.13-2.1.4.jar\";  filename = \"coursier-util_2.13-2.1.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/model/core_3/1.5.5/core_3-1.5.5.jar\";  sha256 = \"1cl6v44p60p9imvfp4gcfz409b7fxi544vap0zqrla6cx6dbh9k0\";  organization = \"Organization(com.softwaremill.sttp.model)\";  module = \"Artifact(core_3)\";  version = \"Version(1.5.5)\";  m2RepoPath = \"com/softwaremill/sttp/model/core_3/1.5.5/core_3-1.5.5.jar\";  filename = \"core_3-1.5.5.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/core_3/1.3.13/core_3-1.3.13.jar\";  sha256 = \"1mw14g3hzgfw13h9rcfiqd5m3asakn4arx33wrnslrd91n8qq3qx\";  organization = \"Organization(com.softwaremill.sttp.shared)\";  module = \"Artifact(core_3)\";  version = \"Version(1.3.13)\";  m2RepoPath = \"com/softwaremill/sttp/shared/core_3/1.3.13/core_3-1.3.13.jar\";  filename = \"core_3-1.3.13.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/ws_3/1.3.13/ws_3-1.3.13.jar\";  sha256 = \"12vm2vgpwgi8d5n0c9lyj63b8hg6fbb0mnk1dqp7zz23q0hmd6pz\";  organization = \"Organization(com.softwaremill.sttp.shared)\";  module = \"Artifact(ws_3)\";  version = \"Version(1.3.13)\";  m2RepoPath = \"com/softwaremill/sttp/shared/ws_3/1.3.13/ws_3-1.3.13.jar\";  filename = \"ws_3-1.3.13.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/lihaoyi/sourcecode_3/0.3.0/sourcecode_3-0.3.0.jar\";  sha256 = \"0x4jqacywh8bv03xcygzr8lwdwcgxmdkbilf6m13zjm6bm9gq3hq\";  organization = \"Organization(com.lihaoyi)\";  module = \"Artifact(sourcecode_3)\";  version = \"Version(0.3.0)\";  m2RepoPath = \"com/lihaoyi/sourcecode_3/0.3.0/sourcecode_3-0.3.0.jar\";  filename = \"sourcecode_3-0.3.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/lihaoyi/geny_3/1.0.0/geny_3-1.0.0.jar\";  sha256 = \"184ic42v9q0syjv58hs47cpd5g8mda4b6wagbw6w42gw57r3vp00\";  organization = \"Organization(com.lihaoyi)\";  module = \"Artifact(geny_3)\";  version = \"Version(1.0.0)\";  m2RepoPath = \"com/lihaoyi/geny_3/1.0.0/geny_3-1.0.0.jar\";  filename = \"geny_3-1.0.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-sync-shared_3/1.0.0-20240120_1020_master/a8-sync-shared_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"1qq84857j9vdcab0kww4jr82gn4p3rjl8f5j84d6dswd2yxfin81\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-sync-shared_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-sync-shared_3/1.0.0-20240120_1020_master/a8-sync-shared_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-sync-shared_3-1.0.0-20240120_1020_master.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio_3/2.0.19/zio_3-2.0.19.jar\";  sha256 = \"1n21jmjd18fd7qb93b4kj9is7cl998idx0azvladjrqrajsj5axx\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio_3/2.0.19/zio_3-2.0.19.jar\";  filename = \"zio_3-2.0.19.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-streams_3/2.0.19/zio-streams_3-2.0.19.jar\";  sha256 = \"1dcgk3h14fs5j4dzq8yd4nxjyqc2hz3mj6zyznlz3jy5zcwsxyap\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-streams_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio-streams_3/2.0.19/zio-streams_3-2.0.19.jar\";  filename = \"zio-streams_3-2.0.19.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-collection-compat_3/2.9.0/scala-collection-compat_3-2.9.0.jar\";  sha256 = \"072b593rv78mh055a4zn1wp78f2w9mcfknwjy8a95ns24k414max\";  organization = \"Organization(org.scala-lang.modules)\";  module = \"Artifact(scala-collection-compat_3)\";  version = \"Version(2.9.0)\";  m2RepoPath = \"org/scala-lang/modules/scala-collection-compat_3/2.9.0/scala-collection-compat_3-2.9.0.jar\";  filename = \"scala-collection-compat_3-2.9.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/cats-core_3/2.9.0/cats-core_3-2.9.0.jar\";  sha256 = \"1kgd5cjkjk7x7g1ls1klnwl87xwi9h2h3iwlqcq1bkl3kndy93qm\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(cats-core_3)\";  version = \"Version(2.9.0)\";  m2RepoPath = \"org/typelevel/cats-core_3/2.9.0/cats-core_3-2.9.0.jar\";  filename = \"cats-core_3-2.9.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/http-client-spi/2.19.6/http-client-spi-2.19.6.jar\";  sha256 = \"17dxqc13vp75r8ada4dfn542ajybh7iabqz7n2c9xikq4bg2b3bl\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(http-client-spi)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/http-client-spi/2.19.6/http-client-spi-2.19.6.jar\";  filename = \"http-client-spi-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/metrics-spi/2.19.6/metrics-spi-2.19.6.jar\";  sha256 = \"1q1y7j94h93mdim6l5mgm5dn6ma8nr806isp8wph2j7izhllvnik\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(metrics-spi)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/metrics-spi/2.19.6/metrics-spi-2.19.6.jar\";  filename = \"metrics-spi-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/utils/2.19.6/utils-2.19.6.jar\";  sha256 = \"0pdnnv25qp92db8adfm9krmq9ag553qf2yqf4j8z4h5vs3ycsml3\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(utils)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/utils/2.19.6/utils-2.19.6.jar\";  filename = \"utils-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/annotations/2.19.6/annotations-2.19.6.jar\";  sha256 = \"1plwv5nsqyvryn2jkwf50i2nkvqq0kq8mr490285wlp22zljww77\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(annotations)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/annotations/2.19.6/annotations-2.19.6.jar\";  filename = \"annotations-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar\";  sha256 = \"0hzp3vrxbnyc6w86v671wp0zchb634rgrwwcc00m0skcarm05sbg\";  organization = \"Organization(org.apache.httpcomponents)\";  module = \"Artifact(httpclient)\";  version = \"Version(4.5.13)\";  m2RepoPath = \"org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar\";  filename = \"httpclient-4.5.13.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.jar\";  sha256 = \"091lnk100aqdg2bwbyg8rnp64dyfpz6kgicylg7my92317a8jvp0\";  organization = \"Organization(org.apache.httpcomponents)\";  module = \"Artifact(httpcore)\";  version = \"Version(4.4.13)\";  m2RepoPath = \"org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.jar\";  filename = \"httpcore-4.4.13.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-xml-protocol/2.19.6/aws-xml-protocol-2.19.6.jar\";  sha256 = \"0dzv0wn6k71gzsym73lm1h38ajpsil940cj8hlmgbvi22b8a4fl7\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(aws-xml-protocol)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/aws-xml-protocol/2.19.6/aws-xml-protocol-2.19.6.jar\";  filename = \"aws-xml-protocol-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/protocol-core/2.19.6/protocol-core-2.19.6.jar\";  sha256 = \"14si82i7vqbmrpg4fcykd8qvz952lr6fy9dqdjjgdb46vc26jzzy\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(protocol-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/protocol-core/2.19.6/protocol-core-2.19.6.jar\";  filename = \"protocol-core-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/sdk-core/2.19.6/sdk-core-2.19.6.jar\";  sha256 = \"1jn8mych9a1mjm175nhw1jvppr4c4imjs56glh9sbc9bd5x4sl1v\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(sdk-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/sdk-core/2.19.6/sdk-core-2.19.6.jar\";  filename = \"sdk-core-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/auth/2.19.6/auth-2.19.6.jar\";  sha256 = \"1gl6aazg3w1nmh5dw35rpanx6hbynvkglj116pja6pdygv3a4qxa\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(auth)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/auth/2.19.6/auth-2.19.6.jar\";  filename = \"auth-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/regions/2.19.6/regions-2.19.6.jar\";  sha256 = \"1acy3440fmjzq9a0wi5pmx6w19c9jpgh0sfygjiv65z45g7bh30r\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(regions)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/regions/2.19.6/regions-2.19.6.jar\";  filename = \"regions-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-core/2.19.6/aws-core-2.19.6.jar\";  sha256 = \"05wd8pizpj926zbd234cl1cwzhjhxfyp1j51k4xk9rgdr3ip8n08\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(aws-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/aws-core/2.19.6/aws-core-2.19.6.jar\";  filename = \"aws-core-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/json-utils/2.19.6/json-utils-2.19.6.jar\";  sha256 = \"00y4rbnahsa24asm8l2d0qbccvld70m26wdw0vr33lm1smzalgdz\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(json-utils)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/json-utils/2.19.6/json-utils-2.19.6.jar\";  filename = \"json-utils-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/endpoints-spi/2.19.6/endpoints-spi-2.19.6.jar\";  sha256 = \"0i9yc2szqhyxbfm9lkgn2kjyg0v4kf821rrmmpcd9bd7bsj75881\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(endpoints-spi)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/endpoints-spi/2.19.6/endpoints-spi-2.19.6.jar\";  filename = \"endpoints-spi-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/netty-nio-client/2.19.6/netty-nio-client-2.19.6.jar\";  sha256 = \"1r92jv12w52v1p9p6bxgraskbaxpdh6nyhraha02hlf4pp158npn\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(netty-nio-client)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/netty-nio-client/2.19.6/netty-nio-client-2.19.6.jar\";  filename = \"netty-nio-client-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/github/alexarchambault/concurrent-reference-hash-map/1.1.0/concurrent-reference-hash-map-1.1.0.jar\";  sha256 = \"0q9g18p1sgb4pzqpv91l7qss30a6rirjxjywzzzbkbq94ac0f9sm\";  organization = \"Organization(io.github.alexarchambault)\";  module = \"Artifact(concurrent-reference-hash-map)\";  version = \"Version(1.1.0)\";  m2RepoPath = \"io/github/alexarchambault/concurrent-reference-hash-map/1.1.0/concurrent-reference-hash-map-1.1.0.jar\";  filename = \"concurrent-reference-hash-map-1.1.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/javax/inject/javax.inject/1/javax.inject-1.jar\";  sha256 = \"1zz7gnahy2352345411rjlhsf64ikkc6z49dqcv1cj0clm271iwi\";  organization = \"Organization(javax.inject)\";  module = \"Artifact(javax.inject)\";  version = \"Version(1)\";  m2RepoPath = \"javax/inject/javax.inject/1/javax.inject-1.jar\";  filename = \"javax.inject-1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar\";  sha256 = \"0yx097fvfzbf68kv3svxyjfngfz84hqz3mryhfs637479ifjbq46\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-utils)\";  version = \"Version(3.5.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar\";  filename = \"plexus-utils-3.5.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-io/3.4.1/plexus-io-3.4.1.jar\";  sha256 = \"1i621m8m3wa7g38ryckvpihcbkzi13gqznsdc1b8dyb855yf0fxc\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-io)\";  version = \"Version(3.4.1)\";  m2RepoPath = \"org/codehaus/plexus/plexus-io/3.4.1/plexus-io-3.4.1.jar\";  filename = \"plexus-io-3.4.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar\";  sha256 = \"020946yakki3qzc652arfndzi594drxanidz9bawbb6vhxnjy6wn\";  organization = \"Organization(commons-io)\";  module = \"Artifact(commons-io)\";  version = \"Version(2.11.0)\";  m2RepoPath = \"commons-io/commons-io/2.11.0/commons-io-2.11.0.jar\";  filename = \"commons-io-2.11.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar\";  sha256 = \"11xpslyspx2yhslvcb7zbifb30kwrafz5dvq9lmndvz9c1qz2ry2\";  organization = \"Organization(org.apache.commons)\";  module = \"Artifact(commons-compress)\";  version = \"Version(1.23.0)\";  m2RepoPath = \"org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar\";  filename = \"commons-compress-1.23.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar\";  sha256 = \"0v1b7iydpnh2rvyzqvqbqm19vr2qva8icq84690bppnpr06r6608\";  organization = \"Organization(org.slf4j)\";  module = \"Artifact(slf4j-api)\";  version = \"Version(2.0.9)\";  m2RepoPath = \"org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar\";  filename = \"slf4j-api-2.0.9.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/iq80/snappy/snappy/0.4/snappy-0.4.jar\";  sha256 = \"1jds257xy63x383vb1dziafv9ziq0z9f9xhz7q3ddsaca1ywi826\";  organization = \"Organization(org.iq80.snappy)\";  module = \"Artifact(snappy)\";  version = \"Version(0.4)\";  m2RepoPath = \"org/iq80/snappy/snappy/0.4/snappy-0.4.jar\";  filename = \"snappy-0.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/tukaani/xz/1.9/xz-1.9.jar\";  sha256 = \"1r9mymavi6w85zbn0zfpxs4m535sfnpxv8x0ydnzky24zin306r1\";  organization = \"Organization(org.tukaani)\";  module = \"Artifact(xz)\";  version = \"Version(1.9)\";  m2RepoPath = \"org/tukaani/xz/1.9/xz-1.9.jar\";  filename = \"xz-1.9.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/github/luben/zstd-jni/1.5.5-2/zstd-jni-1.5.5-2.jar\";  sha256 = \"0nw239vhgwg16w590qjqmfvgdwa462kha1mplqnw45wgcj5hqk18\";  organization = \"Organization(com.github.luben)\";  module = \"Artifact(zstd-jni)\";  version = \"Version(1.5.5-2)\";  m2RepoPath = \"com/github/luben/zstd-jni/1.5.5-2/zstd-jni-1.5.5-2.jar\";  filename = \"zstd-jni-1.5.5-2.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar\";  sha256 = \"0j9m9zbw152gdqvigwh2l922z4nrxzbdbgky86f7qy4zqig7rxsj\";  organization = \"Organization(org.codehaus.plexus)\";  module = \"Artifact(plexus-classworlds)\";  version = \"Version(2.6.0)\";  m2RepoPath = \"org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar\";  filename = \"plexus-classworlds-2.6.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar\";  sha256 = \"1jr92qyx5dmr7sr53vq96a7frxq00yb828pk49kzhsd6nndmwkhh\";  organization = \"Organization(org.apache.xbean)\";  module = \"Artifact(xbean-reflect)\";  version = \"Version(3.7)\";  m2RepoPath = \"org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar\";  filename = \"xbean-reflect-3.7.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar\";  sha256 = \"17qbzl9h7cr7b2ry4y9jyni8cnmg2andg4ya53xv5mrx6a8iknbc\";  organization = \"Organization(org.fusesource.jansi)\";  module = \"Artifact(jansi)\";  version = \"Version(2.4.0)\";  m2RepoPath = \"org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar\";  filename = \"jansi-2.4.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-logging-logback_3/1.0.0-20240120_1020_master/a8-logging-logback_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"0a6znq59wkgi1mipghma9gvs6rvy8karxrvpd4nlcalsic5z241a\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-logging-logback_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-logging-logback_3/1.0.0-20240120_1020_master/a8-logging-logback_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-logging-logback_3-1.0.0-20240120_1020_master.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/case-insensitive_3/1.3.0/case-insensitive_3-1.3.0.jar\";  sha256 = \"109n13dbwlfmzirs1vlilw5x5g41z2xsrk9ahcbd2ffp9ispsb7z\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(case-insensitive_3)\";  version = \"Version(1.3.0)\";  m2RepoPath = \"org/typelevel/case-insensitive_3/1.3.0/case-insensitive_3-1.3.0.jar\";  filename = \"case-insensitive_3-1.3.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/beachape/enumeratum_3/1.7.2/enumeratum_3-1.7.2.jar\";  sha256 = \"0jrm1pg41qy7y14n2x5nbms8w7rfnl7dyzpa7x0n4cq8iba0iwsz\";  organization = \"Organization(com.beachape)\";  module = \"Artifact(enumeratum_3)\";  version = \"Version(1.7.2)\";  m2RepoPath = \"com/beachape/enumeratum_3/1.7.2/enumeratum_3-1.7.2.jar\";  filename = \"enumeratum_3-1.7.2.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/jawn-parser_3/1.4.0/jawn-parser_3-1.4.0.jar\";  sha256 = \"0zx4vg31sj3vmq1xqar93bccx86bkhgpvx61rh8xx68sjgm45wiy\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(jawn-parser_3)\";  version = \"Version(1.4.0)\";  m2RepoPath = \"org/typelevel/jawn-parser_3/1.4.0/jawn-parser_3-1.4.0.jar\";  filename = \"jawn-parser_3-1.4.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/jawn-ast_3/1.4.0/jawn-ast_3-1.4.0.jar\";  sha256 = \"1s8n4wp120qphw0fqpybiy5izk7cyyai1dih6p2dfy0y68v086h7\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(jawn-ast_3)\";  version = \"Version(1.4.0)\";  m2RepoPath = \"org/typelevel/jawn-ast_3/1.4.0/jawn-ast_3-1.4.0.jar\";  filename = \"jawn-ast_3-1.4.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-prelude_3/1.0.0-RC16/zio-prelude_3-1.0.0-RC16.jar\";  sha256 = \"0mxfdr412jz0l9355zaqggssw6syv0wnyswjmxvlpndydb5qznn4\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-prelude_3)\";  version = \"Version(1.0.0-RC16)\";  m2RepoPath = \"dev/zio/zio-prelude_3/1.0.0-RC16/zio-prelude_3-1.0.0-RC16.jar\";  filename = \"zio-prelude_3-1.0.0-RC16.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/client3/zio_3/3.8.11/zio_3-3.8.11.jar\";  sha256 = \"123xv7d16jwxxafli1vfgw38pmnkcasqwdwjls4bhd6h9qkpxdag\";  organization = \"Organization(com.softwaremill.sttp.client3)\";  module = \"Artifact(zio_3)\";  version = \"Version(3.8.11)\";  m2RepoPath = \"com/softwaremill/sttp/client3/zio_3/3.8.11/zio_3-3.8.11.jar\";  filename = \"zio_3-3.8.11.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/hsqldb/hsqldb/2.7.1/hsqldb-2.7.1.jar\";  sha256 = \"1jjkbqii4rd1724ayfkc0x5s4nvg10zx085zrsgvzfjq9hm579dw\";  organization = \"Organization(org.hsqldb)\";  module = \"Artifact(hsqldb)\";  version = \"Version(2.7.1)\";  m2RepoPath = \"org/hsqldb/hsqldb/2.7.1/hsqldb-2.7.1.jar\";  filename = \"hsqldb-2.7.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-cache_3/0.2.2/zio-cache_3-0.2.2.jar\";  sha256 = \"1idlbs2r7lcsgn7yq6kx4clvsahmhmr464si25nnkjkqkln8228b\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-cache_3)\";  version = \"Version(0.2.2)\";  m2RepoPath = \"dev/zio/zio-cache_3/0.2.2/zio-cache_3-0.2.2.jar\";  filename = \"zio-cache_3-0.2.2.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/github/andyglow/typesafe-config-scala_3/2.0.0/typesafe-config-scala_3-2.0.0.jar\";  sha256 = \"0zkk6gb43k32g9yanxgijw8a37c4cdf3xn8j8ch977jlfdfc51ia\";  organization = \"Organization(com.github.andyglow)\";  module = \"Artifact(typesafe-config-scala_3)\";  version = \"Version(2.0.0)\";  m2RepoPath = \"com/github/andyglow/typesafe-config-scala_3/2.0.0/typesafe-config-scala_3-2.0.0.jar\";  filename = \"typesafe-config-scala_3-2.0.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/postgresql/postgresql/42.5.3/postgresql-42.5.3.jar\";  sha256 = \"1gjhicbnmwiaw04qmadmhjfws4dldhgdgdgjnhw5dlgv1f19p5an\";  organization = \"Organization(org.postgresql)\";  module = \"Artifact(postgresql)\";  version = \"Version(42.5.3)\";  m2RepoPath = \"org/postgresql/postgresql/42.5.3/postgresql-42.5.3.jar\";  filename = \"postgresql-42.5.3.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/net/sf/jt400/jt400/11.1/jt400-11.1.jar\";  sha256 = \"1i5w7gxvvszqq2nivb75202i08rnjx5kbfqxf4lbpfa9vf1hd4a5\";  organization = \"Organization(net.sf.jt400)\";  module = \"Artifact(jt400)\";  version = \"Version(11.1)\";  m2RepoPath = \"net/sf/jt400/jt400/11.1/jt400-11.1.jar\";  filename = \"jt400-11.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar\";  sha256 = \"0arsdd1raxamnh42rpbzhbjsyis0y2dr3a1pcwlv8xb7gqwr5m16\";  organization = \"Organization(com.zaxxer)\";  module = \"Artifact(HikariCP)\";  version = \"Version(5.0.1)\";  m2RepoPath = \"com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar\";  filename = \"HikariCP-5.0.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/sun/mail/jakarta.mail/2.0.1/jakarta.mail-2.0.1.jar\";  sha256 = \"08ycjh20wgz0h88g827pchxqy9fj7lwj77hpnwyigvi2x6yvv249\";  organization = \"Organization(com.sun.mail)\";  module = \"Artifact(jakarta.mail)\";  version = \"Version(2.0.1)\";  m2RepoPath = \"com/sun/mail/jakarta.mail/2.0.1/jakarta.mail-2.0.1.jar\";  filename = \"jakarta.mail-2.0.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-internal-macros_3/2.0.19/zio-internal-macros_3-2.0.19.jar\";  sha256 = \"15zzklp8w7fcmkfd4h3zzrlvm5g7ls51zighmhxdk6smgv5xlhs0\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-internal-macros_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio-internal-macros_3/2.0.19/zio-internal-macros_3-2.0.19.jar\";  filename = \"zio-internal-macros_3-2.0.19.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-stacktracer_3/2.0.19/zio-stacktracer_3-2.0.19.jar\";  sha256 = \"0bny0hgrw4hm3d11qzpyxh2f14zpqk2j3adbp6ziqdci3b4ha8sw\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-stacktracer_3)\";  version = \"Version(2.0.19)\";  m2RepoPath = \"dev/zio/zio-stacktracer_3/2.0.19/zio-stacktracer_3-2.0.19.jar\";  filename = \"zio-stacktracer_3-2.0.19.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/izumi-reflect_3/2.3.8/izumi-reflect_3-2.3.8.jar\";  sha256 = \"0w4pdnl8b6c97c1wng4nszic49wyr7jdfbll8hn7lc253v8wlhz3\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(izumi-reflect_3)\";  version = \"Version(2.3.8)\";  m2RepoPath = \"dev/zio/izumi-reflect_3/2.3.8/izumi-reflect_3-2.3.8.jar\";  filename = \"izumi-reflect_3-2.3.8.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/cats-kernel_3/2.9.0/cats-kernel_3-2.9.0.jar\";  sha256 = \"0xjskkd9dvfzaai5447wp96l7g6rbnzfivccv2i25f9mr0v2qdia\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(cats-kernel_3)\";  version = \"Version(2.9.0)\";  m2RepoPath = \"org/typelevel/cats-kernel_3/2.9.0/cats-kernel_3-2.9.0.jar\";  filename = \"cats-kernel_3-2.9.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar\";  sha256 = \"0a2z6ag51d4gb82kbnvjls7scd0h5snbjmqqyrcaqgcvg2bsap7p\";  organization = \"Organization(org.reactivestreams)\";  module = \"Artifact(reactive-streams)\";  version = \"Version(1.0.4)\";  m2RepoPath = \"org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar\";  filename = \"reactive-streams-1.0.4.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/commons-logging/commons-logging/1.2/commons-logging-1.2.jar\";  sha256 = \"0dm61zgmgjkg67kf9dyrzgpayd18r656n05kiabmc3xyl0gfmpfs\";  organization = \"Organization(commons-logging)\";  module = \"Artifact(commons-logging)\";  version = \"Version(1.2)\";  m2RepoPath = \"commons-logging/commons-logging/1.2/commons-logging-1.2.jar\";  filename = \"commons-logging-1.2.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/commons-codec/commons-codec/1.11/commons-codec-1.11.jar\";  sha256 = \"0zbv3psvznwx23iwirphvy0qhkpsdmz958in47s4ialpiqqxb6g5\";  organization = \"Organization(commons-codec)\";  module = \"Artifact(commons-codec)\";  version = \"Version(1.11)\";  m2RepoPath = \"commons-codec/commons-codec/1.11/commons-codec-1.11.jar\";  filename = \"commons-codec-1.11.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-query-protocol/2.19.6/aws-query-protocol-2.19.6.jar\";  sha256 = \"139jrfzlkm8bniripghfy94by0g4xcby2b8jjhkkc96nvpm3hcmi\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(aws-query-protocol)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/aws-query-protocol/2.19.6/aws-query-protocol-2.19.6.jar\";  filename = \"aws-query-protocol-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/profiles/2.19.6/profiles-2.19.6.jar\";  sha256 = \"0j1z2i4j2s387jawiasxfph51zngykx6iwk8vhrhj77l0mqs7d79\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(profiles)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/profiles/2.19.6/profiles-2.19.6.jar\";  filename = \"profiles-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/eventstream/eventstream/1.0.1/eventstream-1.0.1.jar\";  sha256 = \"08p8dk0p7v39lb1k9kig87x21syhn08826qr0b1h4zqijvkdhdqc\";  organization = \"Organization(software.amazon.eventstream)\";  module = \"Artifact(eventstream)\";  version = \"Version(1.0.1)\";  m2RepoPath = \"software/amazon/eventstream/eventstream/1.0.1/eventstream-1.0.1.jar\";  filename = \"eventstream-1.0.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/software/amazon/awssdk/third-party-jackson-core/2.19.6/third-party-jackson-core-2.19.6.jar\";  sha256 = \"1jdk37g7gfvlxr0dr1w8ypx4pyl3bcc6ph5czaqlj985jxpb5z53\";  organization = \"Organization(software.amazon.awssdk)\";  module = \"Artifact(third-party-jackson-core)\";  version = \"Version(2.19.6)\";  m2RepoPath = \"software/amazon/awssdk/third-party-jackson-core/2.19.6/third-party-jackson-core-2.19.6.jar\";  filename = \"third-party-jackson-core-2.19.6.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-codec-http/4.1.86.Final/netty-codec-http-4.1.86.Final.jar\";  sha256 = \"110bqhibncw3qdj3zwlksmadnmyf40913dayaiq7pkyg28qynv1z\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-codec-http)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-codec-http/4.1.86.Final/netty-codec-http-4.1.86.Final.jar\";  filename = \"netty-codec-http-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-codec-http2/4.1.86.Final/netty-codec-http2-4.1.86.Final.jar\";  sha256 = \"0rxi3n0ghkdzgarixg10nk7qiws54297hiwhxnd9ifxnda7f5s78\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-codec-http2)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-codec-http2/4.1.86.Final/netty-codec-http2-4.1.86.Final.jar\";  filename = \"netty-codec-http2-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-codec/4.1.86.Final/netty-codec-4.1.86.Final.jar\";  sha256 = \"1sjv681nv6hxvx2q2141bnv6v4axmnlx2748mdnas7c5bh5q8mh4\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-codec)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-codec/4.1.86.Final/netty-codec-4.1.86.Final.jar\";  filename = \"netty-codec-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-transport/4.1.86.Final/netty-transport-4.1.86.Final.jar\";  sha256 = \"17rch35xh0p5iw664qlan07a6w1s8ixldx5lnd32p4p4ak6nswpn\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-transport)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-transport/4.1.86.Final/netty-transport-4.1.86.Final.jar\";  filename = \"netty-transport-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-common/4.1.86.Final/netty-common-4.1.86.Final.jar\";  sha256 = \"16dfqa7k9sj4jysjscza2dib7wsf5mqfg8wsabccaifdwwb3ynm3\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-common)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-common/4.1.86.Final/netty-common-4.1.86.Final.jar\";  filename = \"netty-common-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-buffer/4.1.86.Final/netty-buffer-4.1.86.Final.jar\";  sha256 = \"125y9ayiv26lxlbnd7mfykwxrnkxzpmkiq56zaqncll6gks1abp4\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-buffer)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-buffer/4.1.86.Final/netty-buffer-4.1.86.Final.jar\";  filename = \"netty-buffer-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-handler/4.1.86.Final/netty-handler-4.1.86.Final.jar\";  sha256 = \"0kf0w7xssjbk4bw7jn5mhia04m3wvxyif99fabf7ici954ll56z6\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-handler)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-handler/4.1.86.Final/netty-handler-4.1.86.Final.jar\";  filename = \"netty-handler-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-transport-classes-epoll/4.1.86.Final/netty-transport-classes-epoll-4.1.86.Final.jar\";  sha256 = \"1npda5dpk59waj2kqa1bdis8v7zh5nlp58cnsprlnssxv23ypirw\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-transport-classes-epoll)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-transport-classes-epoll/4.1.86.Final/netty-transport-classes-epoll-4.1.86.Final.jar\";  filename = \"netty-transport-classes-epoll-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/accur8/a8-logging_3/1.0.0-20240120_1020_master/a8-logging_3-1.0.0-20240120_1020_master.jar\";  sha256 = \"0m88wmz4raqnvwfhz7m7s23mbngkwadrplq5w7jjsxx17snh0sgi\";  organization = \"Organization(io.accur8)\";  module = \"Artifact(a8-logging_3)\";  version = \"Version(1.0.0-20240120_1020_master)\";  m2RepoPath = \"io/accur8/a8-logging_3/1.0.0-20240120_1020_master/a8-logging_3-1.0.0-20240120_1020_master.jar\";  filename = \"a8-logging_3-1.0.0-20240120_1020_master.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/janino/janino/3.1.8/janino-3.1.8.jar\";  sha256 = \"0dvhmv7jzghhizgdlbh2rpla4vvqlkr1i86f0rrlmsd9fzysjf5x\";  organization = \"Organization(org.codehaus.janino)\";  module = \"Artifact(janino)\";  version = \"Version(3.1.8)\";  m2RepoPath = \"org/codehaus/janino/janino/3.1.8/janino-3.1.8.jar\";  filename = \"janino-3.1.8.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar\";  sha256 = \"18dcb0zkish2z0bmraxg82r7cjl1rfhij0a3fzpqgji4pmkp7vip\";  organization = \"Organization(ch.qos.logback)\";  module = \"Artifact(logback-core)\";  version = \"Version(1.4.11)\";  m2RepoPath = \"ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar\";  filename = \"logback-core-1.4.11.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar\";  sha256 = \"03jshlfsvfklhp34w3vsfcjdgh35wdj3h7pdd4lnbyjx3350z185\";  organization = \"Organization(ch.qos.logback)\";  module = \"Artifact(logback-classic)\";  version = \"Version(1.4.11)\";  m2RepoPath = \"ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar\";  filename = \"logback-classic-1.4.11.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/slf4j/jcl-over-slf4j/2.0.9/jcl-over-slf4j-2.0.9.jar\";  sha256 = \"1bq244qcihzm860yfpi6rq1hybagdxs0g9knxcm33jwv2yw1x3zr\";  organization = \"Organization(org.slf4j)\";  module = \"Artifact(jcl-over-slf4j)\";  version = \"Version(2.0.9)\";  m2RepoPath = \"org/slf4j/jcl-over-slf4j/2.0.9/jcl-over-slf4j-2.0.9.jar\";  filename = \"jcl-over-slf4j-2.0.9.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar\";  sha256 = \"1gq0dgbqs89f51ldh4igh1vmipcmxv0z46bx6ra6ygxxsgwfbd39\";  organization = \"Organization(org.slf4j)\";  module = \"Artifact(jul-to-slf4j)\";  version = \"Version(2.0.9)\";  m2RepoPath = \"org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar\";  filename = \"jul-to-slf4j-2.0.9.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/beachape/enumeratum-macros_3/1.6.3/enumeratum-macros_3-1.6.3.jar\";  sha256 = \"173jh1f7izx0y9svdckqv1cvp7g4k6immcczp9189jf1smpzs34k\";  organization = \"Organization(com.beachape)\";  module = \"Artifact(enumeratum-macros_3)\";  version = \"Version(1.6.3)\";  m2RepoPath = \"com/beachape/enumeratum-macros_3/1.6.3/enumeratum-macros_3-1.6.3.jar\";  filename = \"enumeratum-macros_3-1.6.3.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/typelevel/jawn-util_3/1.4.0/jawn-util_3-1.4.0.jar\";  sha256 = \"18h3341q1ipidrhfc758j1f9zq3zsmq1gzkvvbg0k9d20mz5hzla\";  organization = \"Organization(org.typelevel)\";  module = \"Artifact(jawn-util_3)\";  version = \"Version(1.4.0)\";  m2RepoPath = \"org/typelevel/jawn-util_3/1.4.0/jawn-util_3-1.4.0.jar\";  filename = \"jawn-util_3-1.4.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-prelude-macros_3/1.0.0-RC16/zio-prelude-macros_3-1.0.0-RC16.jar\";  sha256 = \"1vir1793m3b9bzk28vgclvl93lmyd8zjn1haa07jij57apc9a037\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-prelude-macros_3)\";  version = \"Version(1.0.0-RC16)\";  m2RepoPath = \"dev/zio/zio-prelude-macros_3/1.0.0-RC16/zio-prelude-macros_3-1.0.0-RC16.jar\";  filename = \"zio-prelude-macros_3-1.0.0-RC16.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/zio_3/1.3.13/zio_3-1.3.13.jar\";  sha256 = \"18gwl4sxq4s65ynvs43z8vbwz7ybdxvb5vi1h0ncnhb64s1k6a1p\";  organization = \"Organization(com.softwaremill.sttp.shared)\";  module = \"Artifact(zio_3)\";  version = \"Version(1.3.13)\";  m2RepoPath = \"com/softwaremill/sttp/shared/zio_3/1.3.13/zio_3-1.3.13.jar\";  filename = \"zio_3-1.3.13.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-interop-reactivestreams_3/2.0.0/zio-interop-reactivestreams_3-2.0.0.jar\";  sha256 = \"0m8dlrixcra0ps4nindj9zwm4wsvf6raj92f4hh3j0vx00mn0r6v\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-interop-reactivestreams_3)\";  version = \"Version(2.0.0)\";  m2RepoPath = \"dev/zio/zio-interop-reactivestreams_3/2.0.0/zio-interop-reactivestreams_3-2.0.0.jar\";  filename = \"zio-interop-reactivestreams_3-2.0.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/typesafe/config/1.4.1/config-1.4.1.jar\";  sha256 = \"13wl9iwx4vp6ikhf60z53q51861irpa87h8zqi08hp674giaf2jc\";  organization = \"Organization(com.typesafe)\";  module = \"Artifact(config)\";  version = \"Version(1.4.1)\";  m2RepoPath = \"com/typesafe/config/1.4.1/config-1.4.1.jar\";  filename = \"config-1.4.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar\";  sha256 = \"19556pzrqcwwmavx3yrbnm6b9kcbjnv3cf2pq9pn15cay6rr16bj\";  organization = \"Organization(org.checkerframework)\";  module = \"Artifact(checker-qual)\";  version = \"Version(3.5.0)\";  m2RepoPath = \"org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar\";  filename = \"checker-qual-3.5.0.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/mysql/mysql-connector-j/8.0.32/mysql-connector-j-8.0.32.jar\";  sha256 = \"1idc2df7djb85a9hh37z2ma38p944z95k6xqbqpg102rjbz2j8sj\";  organization = \"Organization(com.mysql)\";  module = \"Artifact(mysql-connector-j)\";  version = \"Version(8.0.32)\";  m2RepoPath = \"com/mysql/mysql-connector-j/8.0.32/mysql-connector-j-8.0.32.jar\";  filename = \"mysql-connector-j-8.0.32.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/sun/activation/jakarta.activation/2.0.1/jakarta.activation-2.0.1.jar\";  sha256 = \"0w986gsfpgfvibcdzqbq9nx6vj9h66z32rd95rb9ax70srylpqmr\";  organization = \"Organization(com.sun.activation)\";  module = \"Artifact(jakarta.activation)\";  version = \"Version(2.0.1)\";  m2RepoPath = \"com/sun/activation/jakarta.activation/2.0.1/jakarta.activation-2.0.1.jar\";  filename = \"jakarta.activation-2.0.1.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/izumi-reflect-thirdparty-boopickle-shaded_3/2.3.8/izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar\";  sha256 = \"1v26874ka7x0j30996k5avi2qwxffrq515iniscmyarwg3bd2ckc\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(izumi-reflect-thirdparty-boopickle-shaded_3)\";  version = \"Version(2.3.8)\";  m2RepoPath = \"dev/zio/izumi-reflect-thirdparty-boopickle-shaded_3/2.3.8/izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar\";  filename = \"izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-resolver/4.1.86.Final/netty-resolver-4.1.86.Final.jar\";  sha256 = \"1fpxrdmswr3jxfcsk03gc6wq2acy4rzkm4nq87f4693zklqa2a3n\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-resolver)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-resolver/4.1.86.Final/netty-resolver-4.1.86.Final.jar\";  filename = \"netty-resolver-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/io/netty/netty-transport-native-unix-common/4.1.86.Final/netty-transport-native-unix-common-4.1.86.Final.jar\";  sha256 = \"05gi681csblci58pj2r9gg23ykgffwv7jzwrgvar2msn0qxd09pc\";  organization = \"Organization(io.netty)\";  module = \"Artifact(netty-transport-native-unix-common)\";  version = \"Version(4.1.86.Final)\";  m2RepoPath = \"io/netty/netty-transport-native-unix-common/4.1.86.Final/netty-transport-native-unix-common-4.1.86.Final.jar\";  filename = \"netty-transport-native-unix-common-4.1.86.Final.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-logging_3/2.1.15/zio-logging_3-2.1.15.jar\";  sha256 = \"1wxhxpvad5hc21g3ai7m91v2mqc8wia589mzq86ivlm7fkp4wmb7\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-logging_3)\";  version = \"Version(2.1.15)\";  m2RepoPath = \"dev/zio/zio-logging_3/2.1.15/zio-logging_3-2.1.15.jar\";  filename = \"zio-logging_3-2.1.15.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-logging-slf4j2_3/2.1.15/zio-logging-slf4j2_3-2.1.15.jar\";  sha256 = \"1903ndanaa266k0yrgwmiwgl7n7y47yhkixvl4b7rq3cqcb6g8y0\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-logging-slf4j2_3)\";  version = \"Version(2.1.15)\";  m2RepoPath = \"dev/zio/zio-logging-slf4j2_3/2.1.15/zio-logging-slf4j2_3-2.1.15.jar\";  filename = \"zio-logging-slf4j2_3-2.1.15.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/org/codehaus/janino/commons-compiler/3.1.8/commons-compiler-3.1.8.jar\";  sha256 = \"1vrf9si22kczh84fr7i7lw26vama173vvbh2fzlikxm6hnxm5cp7\";  organization = \"Organization(org.codehaus.janino)\";  module = \"Artifact(commons-compiler)\";  version = \"Version(3.1.8)\";  m2RepoPath = \"org/codehaus/janino/commons-compiler/3.1.8/commons-compiler-3.1.8.jar\";  filename = \"commons-compiler-3.1.8.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar\";  sha256 = \"1r01cdp5w97zgb7zwn2pyrcx9gznmv2qz3zzzpmjslbidakv8y0v\";  organization = \"Organization(com.google.protobuf)\";  module = \"Artifact(protobuf-java)\";  version = \"Version(3.21.9)\";  m2RepoPath = \"com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar\";  filename = \"protobuf-java-3.21.9.jar\";  }\n    { url = \"https://locus.accur8.net/repos/all/dev/zio/zio-parser_3/0.1.9/zio-parser_3-0.1.9.jar\";  sha256 = \"1shij789vc4vkrdyjxzlkyzmzp24413iy3pmafijliccizl06hm9\";  organization = \"Organization(dev.zio)\";  module = \"Artifact(zio-parser_3)\";  version = \"Version(0.1.9)\";  m2RepoPath = \"dev/zio/zio-parser_3/0.1.9/zio-parser_3-0.1.9.jar\";  filename = \"zio-parser_3-0.1.9.jar\";  }\n  ];\n}"
+    },
+    {
+      "filename": "java-launcher-template",
+      "contents": "#!/bin/bash\n\nexec _out_/bin/_name_j -cp _out_/lib/*:. _args_ \"$@\"\n"
+    }
+  ],
+  "resolvedVersion": "1.0.0-20241022_1519_master",
+  "resolutionResponse": {
+    "request": {
+      "organization": "io.accur8",
+      "branch": "master",
+      "version": "latest",
+      "repoPrefix": "repo",
+      "artifact": "a8-versions_3"
+    },
+    "version": "1.0.0-20241022_1519_master",
+    "repoUrl": "https://locus.accur8.net/repos/all",
+    "artifacts": [
+      {
+        "organization": "io.accur8",
+        "module": "a8-versions_3",
+        "url": "https://locus.accur8.net/repos/all/io/accur8/a8-versions_3/1.0.0-20241022_1519_master/a8-versions_3-1.0.0-20241022_1519_master.jar",
+        "version": "1.0.0-20241022_1519_master",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.scala-lang",
+        "module": "scala3-library_3",
+        "url": "https://locus.accur8.net/repos/all/org/scala-lang/scala3-library_3/3.3.1/scala3-library_3-3.3.1.jar",
+        "version": "3.3.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.get-coursier",
+        "module": "coursier_2.13",
+        "url": "https://locus.accur8.net/repos/all/io/get-coursier/coursier_2.13/2.1.4/coursier_2.13-2.1.4.jar",
+        "version": "2.1.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.get-coursier",
+        "module": "coursier-cache_2.13",
+        "url": "https://locus.accur8.net/repos/all/io/get-coursier/coursier-cache_2.13/2.1.4/coursier-cache_2.13-2.1.4.jar",
+        "version": "2.1.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.scala-lang.modules",
+        "module": "scala-xml_3",
+        "url": "https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-xml_3/2.1.0/scala-xml_3-2.1.0.jar",
+        "version": "2.1.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.softwaremill.sttp.client3",
+        "module": "core_3",
+        "url": "https://locus.accur8.net/repos/all/com/softwaremill/sttp/client3/core_3/3.8.15/core_3-3.8.15.jar",
+        "version": "3.8.15",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.lihaoyi",
+        "module": "fastparse_3",
+        "url": "https://locus.accur8.net/repos/all/com/lihaoyi/fastparse_3/3.0.1/fastparse_3-3.0.1.jar",
+        "version": "3.0.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.accur8",
+        "module": "a8-sync-api_3",
+        "url": "https://locus.accur8.net/repos/all/io/accur8/a8-sync-api_3/1.0.0-20240120_1020_master/a8-sync-api_3-1.0.0-20240120_1020_master.jar",
+        "version": "1.0.0-20240120_1020_master",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.rogach",
+        "module": "scallop_3",
+        "url": "https://locus.accur8.net/repos/all/org/rogach/scallop_3/4.1.0/scallop_3-4.1.0.jar",
+        "version": "4.1.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-process_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-process_3/0.7.2/zio-process_3-0.7.2.jar",
+        "version": "0.7.2",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "cats-parse_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/cats-parse_3/0.3.9/cats-parse_3-0.3.9.jar",
+        "version": "0.3.9",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "apache-client",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/apache-client/2.19.6/apache-client-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "route53",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/route53/2.19.6/route53-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.scala-lang",
+        "module": "scala-library",
+        "url": "https://locus.accur8.net/repos/all/org/scala-lang/scala-library/2.13.10/scala-library-2.13.10.jar",
+        "version": "2.13.10",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.github.plokhotnyuk.jsoniter-scala",
+        "module": "jsoniter-scala-core_2.13",
+        "url": "https://locus.accur8.net/repos/all/com/github/plokhotnyuk/jsoniter-scala/jsoniter-scala-core_2.13/2.13.5.2/jsoniter-scala-core_2.13-2.13.5.2.jar",
+        "version": "2.13.5.2",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.get-coursier",
+        "module": "coursier-core_2.13",
+        "url": "https://locus.accur8.net/repos/all/io/get-coursier/coursier-core_2.13/2.1.4/coursier-core_2.13-2.1.4.jar",
+        "version": "2.1.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.get-coursier",
+        "module": "coursier-proxy-setup",
+        "url": "https://locus.accur8.net/repos/all/io/get-coursier/coursier-proxy-setup/2.1.4/coursier-proxy-setup-2.1.4.jar",
+        "version": "2.1.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.get-coursier.jniutils",
+        "module": "windows-jni-utils",
+        "url": "https://locus.accur8.net/repos/all/io/get-coursier/jniutils/windows-jni-utils/0.3.3/windows-jni-utils-0.3.3.jar",
+        "version": "0.3.3",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.plexus",
+        "module": "plexus-archiver",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-archiver/4.7.1/plexus-archiver-4.7.1.jar",
+        "version": "4.7.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.plexus",
+        "module": "plexus-container-default",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-container-default/2.1.1/plexus-container-default-2.1.1.jar",
+        "version": "2.1.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.virtuslab.scala-cli",
+        "module": "config_2.13",
+        "url": "https://locus.accur8.net/repos/all/org/virtuslab/scala-cli/config_2.13/0.2.1/config_2.13-0.2.1.jar",
+        "version": "0.2.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.github.alexarchambault.windows-ansi",
+        "module": "windows-ansi",
+        "url": "https://locus.accur8.net/repos/all/io/github/alexarchambault/windows-ansi/windows-ansi/0.0.5/windows-ansi-0.0.5.jar",
+        "version": "0.0.5",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.get-coursier",
+        "module": "coursier-util_2.13",
+        "url": "https://locus.accur8.net/repos/all/io/get-coursier/coursier-util_2.13/2.1.4/coursier-util_2.13-2.1.4.jar",
+        "version": "2.1.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.softwaremill.sttp.model",
+        "module": "core_3",
+        "url": "https://locus.accur8.net/repos/all/com/softwaremill/sttp/model/core_3/1.5.5/core_3-1.5.5.jar",
+        "version": "1.5.5",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.softwaremill.sttp.shared",
+        "module": "core_3",
+        "url": "https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/core_3/1.3.13/core_3-1.3.13.jar",
+        "version": "1.3.13",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.softwaremill.sttp.shared",
+        "module": "ws_3",
+        "url": "https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/ws_3/1.3.13/ws_3-1.3.13.jar",
+        "version": "1.3.13",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.lihaoyi",
+        "module": "sourcecode_3",
+        "url": "https://locus.accur8.net/repos/all/com/lihaoyi/sourcecode_3/0.3.0/sourcecode_3-0.3.0.jar",
+        "version": "0.3.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.lihaoyi",
+        "module": "geny_3",
+        "url": "https://locus.accur8.net/repos/all/com/lihaoyi/geny_3/1.0.0/geny_3-1.0.0.jar",
+        "version": "1.0.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.accur8",
+        "module": "a8-sync-shared_3",
+        "url": "https://locus.accur8.net/repos/all/io/accur8/a8-sync-shared_3/1.0.0-20240120_1020_master/a8-sync-shared_3-1.0.0-20240120_1020_master.jar",
+        "version": "1.0.0-20240120_1020_master",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio_3/2.0.19/zio_3-2.0.19.jar",
+        "version": "2.0.19",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-streams_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-streams_3/2.0.19/zio-streams_3-2.0.19.jar",
+        "version": "2.0.19",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.scala-lang.modules",
+        "module": "scala-collection-compat_3",
+        "url": "https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-collection-compat_3/2.9.0/scala-collection-compat_3-2.9.0.jar",
+        "version": "2.9.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "cats-core_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/cats-core_3/2.9.0/cats-core_3-2.9.0.jar",
+        "version": "2.9.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "http-client-spi",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/http-client-spi/2.19.6/http-client-spi-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "metrics-spi",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/metrics-spi/2.19.6/metrics-spi-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "utils",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/utils/2.19.6/utils-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "annotations",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/annotations/2.19.6/annotations-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.apache.httpcomponents",
+        "module": "httpclient",
+        "url": "https://locus.accur8.net/repos/all/org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar",
+        "version": "4.5.13",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.apache.httpcomponents",
+        "module": "httpcore",
+        "url": "https://locus.accur8.net/repos/all/org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.jar",
+        "version": "4.4.13",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "aws-xml-protocol",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-xml-protocol/2.19.6/aws-xml-protocol-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "protocol-core",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/protocol-core/2.19.6/protocol-core-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "sdk-core",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/sdk-core/2.19.6/sdk-core-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "auth",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/auth/2.19.6/auth-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "regions",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/regions/2.19.6/regions-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "aws-core",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-core/2.19.6/aws-core-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "json-utils",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/json-utils/2.19.6/json-utils-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "endpoints-spi",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/endpoints-spi/2.19.6/endpoints-spi-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "netty-nio-client",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/netty-nio-client/2.19.6/netty-nio-client-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.github.alexarchambault",
+        "module": "concurrent-reference-hash-map",
+        "url": "https://locus.accur8.net/repos/all/io/github/alexarchambault/concurrent-reference-hash-map/1.1.0/concurrent-reference-hash-map-1.1.0.jar",
+        "version": "1.1.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "javax.inject",
+        "module": "javax.inject",
+        "url": "https://locus.accur8.net/repos/all/javax/inject/javax.inject/1/javax.inject-1.jar",
+        "version": "1",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.plexus",
+        "module": "plexus-utils",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-utils/3.5.1/plexus-utils-3.5.1.jar",
+        "version": "3.5.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.plexus",
+        "module": "plexus-io",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-io/3.4.1/plexus-io-3.4.1.jar",
+        "version": "3.4.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "commons-io",
+        "module": "commons-io",
+        "url": "https://locus.accur8.net/repos/all/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar",
+        "version": "2.11.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.apache.commons",
+        "module": "commons-compress",
+        "url": "https://locus.accur8.net/repos/all/org/apache/commons/commons-compress/1.23.0/commons-compress-1.23.0.jar",
+        "version": "1.23.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.slf4j",
+        "module": "slf4j-api",
+        "url": "https://locus.accur8.net/repos/all/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar",
+        "version": "2.0.9",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.iq80.snappy",
+        "module": "snappy",
+        "url": "https://locus.accur8.net/repos/all/org/iq80/snappy/snappy/0.4/snappy-0.4.jar",
+        "version": "0.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.tukaani",
+        "module": "xz",
+        "url": "https://locus.accur8.net/repos/all/org/tukaani/xz/1.9/xz-1.9.jar",
+        "version": "1.9",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.github.luben",
+        "module": "zstd-jni",
+        "url": "https://locus.accur8.net/repos/all/com/github/luben/zstd-jni/1.5.5-2/zstd-jni-1.5.5-2.jar",
+        "version": "1.5.5-2",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.plexus",
+        "module": "plexus-classworlds",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar",
+        "version": "2.6.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.apache.xbean",
+        "module": "xbean-reflect",
+        "url": "https://locus.accur8.net/repos/all/org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar",
+        "version": "3.7",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.fusesource.jansi",
+        "module": "jansi",
+        "url": "https://locus.accur8.net/repos/all/org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
+        "version": "2.4.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.accur8",
+        "module": "a8-logging-logback_3",
+        "url": "https://locus.accur8.net/repos/all/io/accur8/a8-logging-logback_3/1.0.0-20240120_1020_master/a8-logging-logback_3-1.0.0-20240120_1020_master.jar",
+        "version": "1.0.0-20240120_1020_master",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "case-insensitive_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/case-insensitive_3/1.3.0/case-insensitive_3-1.3.0.jar",
+        "version": "1.3.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.beachape",
+        "module": "enumeratum_3",
+        "url": "https://locus.accur8.net/repos/all/com/beachape/enumeratum_3/1.7.2/enumeratum_3-1.7.2.jar",
+        "version": "1.7.2",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "jawn-parser_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/jawn-parser_3/1.4.0/jawn-parser_3-1.4.0.jar",
+        "version": "1.4.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "jawn-ast_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/jawn-ast_3/1.4.0/jawn-ast_3-1.4.0.jar",
+        "version": "1.4.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-prelude_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-prelude_3/1.0.0-RC16/zio-prelude_3-1.0.0-RC16.jar",
+        "version": "1.0.0-RC16",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.softwaremill.sttp.client3",
+        "module": "zio_3",
+        "url": "https://locus.accur8.net/repos/all/com/softwaremill/sttp/client3/zio_3/3.8.11/zio_3-3.8.11.jar",
+        "version": "3.8.11",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.hsqldb",
+        "module": "hsqldb",
+        "url": "https://locus.accur8.net/repos/all/org/hsqldb/hsqldb/2.7.1/hsqldb-2.7.1.jar",
+        "version": "2.7.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-cache_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-cache_3/0.2.2/zio-cache_3-0.2.2.jar",
+        "version": "0.2.2",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.github.andyglow",
+        "module": "typesafe-config-scala_3",
+        "url": "https://locus.accur8.net/repos/all/com/github/andyglow/typesafe-config-scala_3/2.0.0/typesafe-config-scala_3-2.0.0.jar",
+        "version": "2.0.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.postgresql",
+        "module": "postgresql",
+        "url": "https://locus.accur8.net/repos/all/org/postgresql/postgresql/42.5.3/postgresql-42.5.3.jar",
+        "version": "42.5.3",
+        "extension": "jar"
+      },
+      {
+        "organization": "net.sf.jt400",
+        "module": "jt400",
+        "url": "https://locus.accur8.net/repos/all/net/sf/jt400/jt400/11.1/jt400-11.1.jar",
+        "version": "11.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.zaxxer",
+        "module": "HikariCP",
+        "url": "https://locus.accur8.net/repos/all/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar",
+        "version": "5.0.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.sun.mail",
+        "module": "jakarta.mail",
+        "url": "https://locus.accur8.net/repos/all/com/sun/mail/jakarta.mail/2.0.1/jakarta.mail-2.0.1.jar",
+        "version": "2.0.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-internal-macros_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-internal-macros_3/2.0.19/zio-internal-macros_3-2.0.19.jar",
+        "version": "2.0.19",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-stacktracer_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-stacktracer_3/2.0.19/zio-stacktracer_3-2.0.19.jar",
+        "version": "2.0.19",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "izumi-reflect_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/izumi-reflect_3/2.3.8/izumi-reflect_3-2.3.8.jar",
+        "version": "2.3.8",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "cats-kernel_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/cats-kernel_3/2.9.0/cats-kernel_3-2.9.0.jar",
+        "version": "2.9.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.reactivestreams",
+        "module": "reactive-streams",
+        "url": "https://locus.accur8.net/repos/all/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar",
+        "version": "1.0.4",
+        "extension": "jar"
+      },
+      {
+        "organization": "commons-logging",
+        "module": "commons-logging",
+        "url": "https://locus.accur8.net/repos/all/commons-logging/commons-logging/1.2/commons-logging-1.2.jar",
+        "version": "1.2",
+        "extension": "jar"
+      },
+      {
+        "organization": "commons-codec",
+        "module": "commons-codec",
+        "url": "https://locus.accur8.net/repos/all/commons-codec/commons-codec/1.11/commons-codec-1.11.jar",
+        "version": "1.11",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "aws-query-protocol",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/aws-query-protocol/2.19.6/aws-query-protocol-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "profiles",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/profiles/2.19.6/profiles-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.eventstream",
+        "module": "eventstream",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/eventstream/eventstream/1.0.1/eventstream-1.0.1.jar",
+        "version": "1.0.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "software.amazon.awssdk",
+        "module": "third-party-jackson-core",
+        "url": "https://locus.accur8.net/repos/all/software/amazon/awssdk/third-party-jackson-core/2.19.6/third-party-jackson-core-2.19.6.jar",
+        "version": "2.19.6",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-codec-http",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-codec-http/4.1.86.Final/netty-codec-http-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-codec-http2",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-codec-http2/4.1.86.Final/netty-codec-http2-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-codec",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-codec/4.1.86.Final/netty-codec-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-transport",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-transport/4.1.86.Final/netty-transport-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-common",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-common/4.1.86.Final/netty-common-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-buffer",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-buffer/4.1.86.Final/netty-buffer-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-handler",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-handler/4.1.86.Final/netty-handler-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-transport-classes-epoll",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-transport-classes-epoll/4.1.86.Final/netty-transport-classes-epoll-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.accur8",
+        "module": "a8-logging_3",
+        "url": "https://locus.accur8.net/repos/all/io/accur8/a8-logging_3/1.0.0-20240120_1020_master/a8-logging_3-1.0.0-20240120_1020_master.jar",
+        "version": "1.0.0-20240120_1020_master",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.janino",
+        "module": "janino",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/janino/janino/3.1.8/janino-3.1.8.jar",
+        "version": "3.1.8",
+        "extension": "jar"
+      },
+      {
+        "organization": "ch.qos.logback",
+        "module": "logback-core",
+        "url": "https://locus.accur8.net/repos/all/ch/qos/logback/logback-core/1.4.11/logback-core-1.4.11.jar",
+        "version": "1.4.11",
+        "extension": "jar"
+      },
+      {
+        "organization": "ch.qos.logback",
+        "module": "logback-classic",
+        "url": "https://locus.accur8.net/repos/all/ch/qos/logback/logback-classic/1.4.11/logback-classic-1.4.11.jar",
+        "version": "1.4.11",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.slf4j",
+        "module": "jcl-over-slf4j",
+        "url": "https://locus.accur8.net/repos/all/org/slf4j/jcl-over-slf4j/2.0.9/jcl-over-slf4j-2.0.9.jar",
+        "version": "2.0.9",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.slf4j",
+        "module": "jul-to-slf4j",
+        "url": "https://locus.accur8.net/repos/all/org/slf4j/jul-to-slf4j/2.0.9/jul-to-slf4j-2.0.9.jar",
+        "version": "2.0.9",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.beachape",
+        "module": "enumeratum-macros_3",
+        "url": "https://locus.accur8.net/repos/all/com/beachape/enumeratum-macros_3/1.6.3/enumeratum-macros_3-1.6.3.jar",
+        "version": "1.6.3",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.typelevel",
+        "module": "jawn-util_3",
+        "url": "https://locus.accur8.net/repos/all/org/typelevel/jawn-util_3/1.4.0/jawn-util_3-1.4.0.jar",
+        "version": "1.4.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-prelude-macros_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-prelude-macros_3/1.0.0-RC16/zio-prelude-macros_3-1.0.0-RC16.jar",
+        "version": "1.0.0-RC16",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.softwaremill.sttp.shared",
+        "module": "zio_3",
+        "url": "https://locus.accur8.net/repos/all/com/softwaremill/sttp/shared/zio_3/1.3.13/zio_3-1.3.13.jar",
+        "version": "1.3.13",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-interop-reactivestreams_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-interop-reactivestreams_3/2.0.0/zio-interop-reactivestreams_3-2.0.0.jar",
+        "version": "2.0.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.typesafe",
+        "module": "config",
+        "url": "https://locus.accur8.net/repos/all/com/typesafe/config/1.4.1/config-1.4.1.jar",
+        "version": "1.4.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.checkerframework",
+        "module": "checker-qual",
+        "url": "https://locus.accur8.net/repos/all/org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar",
+        "version": "3.5.0",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.mysql",
+        "module": "mysql-connector-j",
+        "url": "https://locus.accur8.net/repos/all/com/mysql/mysql-connector-j/8.0.32/mysql-connector-j-8.0.32.jar",
+        "version": "8.0.32",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.sun.activation",
+        "module": "jakarta.activation",
+        "url": "https://locus.accur8.net/repos/all/com/sun/activation/jakarta.activation/2.0.1/jakarta.activation-2.0.1.jar",
+        "version": "2.0.1",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "izumi-reflect-thirdparty-boopickle-shaded_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/izumi-reflect-thirdparty-boopickle-shaded_3/2.3.8/izumi-reflect-thirdparty-boopickle-shaded_3-2.3.8.jar",
+        "version": "2.3.8",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-resolver",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-resolver/4.1.86.Final/netty-resolver-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "io.netty",
+        "module": "netty-transport-native-unix-common",
+        "url": "https://locus.accur8.net/repos/all/io/netty/netty-transport-native-unix-common/4.1.86.Final/netty-transport-native-unix-common-4.1.86.Final.jar",
+        "version": "4.1.86.Final",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-logging_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-logging_3/2.1.15/zio-logging_3-2.1.15.jar",
+        "version": "2.1.15",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-logging-slf4j2_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-logging-slf4j2_3/2.1.15/zio-logging-slf4j2_3-2.1.15.jar",
+        "version": "2.1.15",
+        "extension": "jar"
+      },
+      {
+        "organization": "org.codehaus.janino",
+        "module": "commons-compiler",
+        "url": "https://locus.accur8.net/repos/all/org/codehaus/janino/commons-compiler/3.1.8/commons-compiler-3.1.8.jar",
+        "version": "3.1.8",
+        "extension": "jar"
+      },
+      {
+        "organization": "com.google.protobuf",
+        "module": "protobuf-java",
+        "url": "https://locus.accur8.net/repos/all/com/google/protobuf/protobuf-java/3.21.9/protobuf-java-3.21.9.jar",
+        "version": "3.21.9",
+        "extension": "jar"
+      },
+      {
+        "organization": "dev.zio",
+        "module": "zio-parser_3",
+        "url": "https://locus.accur8.net/repos/all/dev/zio/zio-parser_3/0.1.9/zio-parser_3-0.1.9.jar",
+        "version": "0.1.9",
+        "extension": "jar"
+      }
+    ]
+  }
+}

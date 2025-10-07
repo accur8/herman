@@ -1,0 +1,11 @@
+# Example repo.properties file
+# Copy this to ~/.a8/repo.properties and update with your credentials
+
+repo_url=https://locus2.accur8.net/repos/all
+repo_user=reader
+repo_password=a_password
+
+# You can configure multiple repositories:
+# bob_url=https://another.example.com/repos
+# bob_user=user
+# bob_password=pass

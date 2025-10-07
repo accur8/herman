@@ -7,8 +7,31 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"time"
 )
+
+// getNixpkgsURL returns the appropriate nixpkgs URL based on the target environment
+func getNixpkgsURL() string {
+	// macOS → github:NixOS/nixpkgs
+	if runtime.GOOS == "darwin" {
+		return "github:NixOS/nixpkgs"
+	}
+
+	// Linux: check if NixOS
+	if runtime.GOOS == "linux" {
+		// Check for NixOS by looking for /etc/NIXOS
+		if _, err := os.Stat("/etc/NIXOS"); err == nil {
+			// NixOS → github:NixOS/nixpkgs/nixos-unstable
+			return "github:NixOS/nixpkgs/nixos-unstable"
+		}
+		// non-NixOS Linux → github:NixOS/nixpkgs
+		return "github:NixOS/nixpkgs"
+	}
+
+	// Fallback for other systems
+	return "github:NixOS/nixpkgs"
+}
 
 // ensureRootFlake ensures that the root flake.nix exists at ~/.a8/herman/
 func ensureRootFlake(homeDir string) error {
@@ -28,12 +51,16 @@ func ensureRootFlake(homeDir string) error {
 		return fmt.Errorf("failed to create herman directory: %w", err)
 	}
 
+	// Get the appropriate nixpkgs URL for this environment
+	nixpkgsURL := getNixpkgsURL()
+	trace("Using nixpkgs URL: %s", nixpkgsURL)
+
 	// Create the root flake.nix
-	flakeContent := `{
+	flakeContent := fmt.Sprintf(`{
   description = "Herman - shared nixpkgs for all managed packages";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "%s";
   };
 
   outputs = { self, nixpkgs }: {
@@ -41,7 +68,7 @@ func ensureRootFlake(homeDir string) error {
     # Update with: nix flake update
   };
 }
-`
+`, nixpkgsURL)
 
 	if err := os.WriteFile(flakeNixPath, []byte(flakeContent), 0644); err != nil {
 		return fmt.Errorf("failed to write root flake.nix: %w", err)

@@ -432,6 +432,11 @@ func runGenerateCommand() error {
 		return fmt.Errorf("failed to get user home directory: %w", err)
 	}
 
+	// Ensure root flake exists (needed for generated flake.nix to reference)
+	if err := ensureRootFlake(homeDir); err != nil {
+		return fmt.Errorf("failed to ensure root flake: %w", err)
+	}
+
 	// Fetch maven metadata and get latest version
 	fmt.Fprintf(os.Stderr, "Fetching latest version for %s:%s...\n", config.Organization, config.Artifact)
 
@@ -503,8 +508,36 @@ func runGenerateCommand() error {
 		return fmt.Errorf("failed to write default.nix: %w", err)
 	}
 
+	// Create flake.nix that references root Herman flake
+	nixSystem := getNixSystem()
+	hermanRootPath := filepath.Join(homeDir, ".a8", "herman")
+
+	flakeContent := fmt.Sprintf(`{
+  description = "%s - managed by Herman";
+
+  inputs = {
+    hermanRoot.url = "path:%s";
+    nixpkgs.follows = "hermanRoot/nixpkgs";
+  };
+
+  outputs = { self, nixpkgs, hermanRoot }:
+    let
+      system = "%s";
+      pkgs = nixpkgs.legacyPackages.${system};
+    in {
+      packages.${system}.default = pkgs.callPackage ./default.nix {};
+    };
+}
+`, config.Name, hermanRootPath, nixSystem)
+
+	flakeNixPath := filepath.Join(outputDir, "flake.nix")
+	if err := os.WriteFile(flakeNixPath, []byte(flakeContent), 0644); err != nil {
+		return fmt.Errorf("failed to write flake.nix: %w", err)
+	}
+
 	fmt.Fprintf(os.Stderr, "Generated Nix files in %s\n", outputDir)
 	fmt.Printf("  default.nix\n")
+	fmt.Printf("  flake.nix\n")
 	fmt.Printf("\nVersion: %s\n", latestVersion)
 	fmt.Printf("Dependencies: %d\n", len(dependencies))
 

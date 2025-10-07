@@ -106,9 +106,9 @@ func checkForUpdates(homeDir string, config *LauncherConfig) (string, *NixBuildR
 
 	// Check if we got dependencies in the response
 	if len(nixBuildResp.ResolutionResponse.Artifacts) == 0 {
-		// Fall back to extracting from files if available
+		// Fall back to extracting from files if available (backward compatibility)
 		if len(nixBuildResp.Files) > 0 {
-			trace("No artifacts in resolutionResponse, extracting from files")
+			trace("No artifacts in resolutionResponse, falling back to files (old API)")
 			version, err := extractVersionFromNixFiles(nixBuildResp.Files)
 			if err != nil {
 				return "", nil, fmt.Errorf("failed to extract version: %w", err)
@@ -119,6 +119,11 @@ func checkForUpdates(homeDir string, config *LauncherConfig) (string, *NixBuildR
 	}
 
 	trace("Received %d dependencies from API", len(nixBuildResp.ResolutionResponse.Artifacts))
+	if len(nixBuildResp.Files) > 0 {
+		trace("Note: API also returned %d files (will be ignored, using local generation)", len(nixBuildResp.Files))
+	} else {
+		trace("API correctly returned only dependency resolution (no files)")
+	}
 
 	return latestVersion, nixBuildResp, nil
 }
@@ -230,14 +235,6 @@ func installWithResponse(homeDir string, config *LauncherConfig, nixBuildResp *N
 			return fmt.Errorf("failed to write default.nix: %w", err)
 		}
 		trace("Generated default.nix")
-
-		// Generate java-launcher-template
-		launcherTemplate := GenerateJavaLauncherTemplate()
-		launcherTemplatePath := filepath.Join(nixBuildDir, "java-launcher-template")
-		if err := os.WriteFile(launcherTemplatePath, []byte(launcherTemplate), 0644); err != nil {
-			return fmt.Errorf("failed to write java-launcher-template: %w", err)
-		}
-		trace("Generated java-launcher-template")
 
 		fmt.Fprintf(os.Stderr, "Generated Nix build files\n")
 	}

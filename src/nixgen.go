@@ -59,7 +59,9 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 	}
 
 	return fmt.Sprintf(`{
+  bash,
   fetchurl,
+  lib,
   linkFarm,
   %s
   stdenv,
@@ -78,7 +80,7 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
         repo = %q;
         organization = %q;
         artifact = %q;
-        version = null;
+        version = %q;
         branch = %q;
         webappExplode = null;
         javaVersion = %s;
@@ -117,7 +119,8 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 
     classpathBuilder = linkFarm launcherConfig.name (map linkFarmEntryFn artifacts);
 
-    args = builtins.concatStringsSep " " (launcherConfig.jvmArgs ++ [launcherConfig.mainClass] ++ launcherConfig.args);
+    # Properly escape args for safe shell evaluation
+    argsEscaped = lib.escapeShellArgs (launcherConfig.jvmArgs ++ [launcherConfig.mainClass] ++ launcherConfig.args);
 
     webappExploder =
       if webappExplode then
@@ -149,13 +152,16 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 
         LAUNCHER=$out/bin/${launcherConfig.name}
 
-        # setup launcher script
-        cp ./java-launcher-template $LAUNCHER
+        # Generate launcher script inline (no template file needed)
+        cat > $LAUNCHER <<EOF
+#!${bash}/bin/bash
+# Generated at build time. Invokes the per-JDK wrapper (${launcherConfig.name}j).
+# -cp includes all jars in $out/lib plus the working dir.
+exec $out/bin/${launcherConfig.name}j -cp $out/lib/*:. ${argsEscaped} "\$@"
+EOF
+
         chmod +x $LAUNCHER
-        substituteInPlace $LAUNCHER \
-          --replace _name_ ${launcherConfig.name} \
-          --replace _out_ $out \
-          --replace _args_ "${args}"
+        patchShebangs $LAUNCHER
 
       '' + webappExploder;
     }
@@ -168,18 +174,11 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 		config.Repo,
 		config.Organization,
 		config.Artifact,
+		config.Version,
 		config.Branch,
 		javaVersionStr,
 		depsBuilder.String(),
 	)
-}
-
-// GenerateJavaLauncherTemplate generates the java-launcher-template bash script
-func GenerateJavaLauncherTemplate() string {
-	return `#!/bin/bash
-
-exec _out_/bin/_name_j -cp _out_/lib/*:. _args_ "$@"
-`
 }
 
 // formatNixList formats a Go string slice as a Nix list

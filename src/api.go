@@ -59,6 +59,8 @@ func callNixBuildDescriptionAPIWithVersion(repoConfig *RepoConfig, config *Launc
 	}
 
 	// Build the request
+	// Note: resolveOnly=true tells the server we only need dependency resolution,
+	// not the full Nix file generation (we generate those locally)
 	request := NixBuildRequest{
 		Kind:         "jvm_cli",
 		MainClass:    config.MainClass,
@@ -69,7 +71,7 @@ func callNixBuildDescriptionAPIWithVersion(repoConfig *RepoConfig, config *Launc
 			"programName":            programName,
 			"rawCommandLineArgs":     args,
 			"resolvedCommandLineArgs": []string{},
-			"resolveOnly":            true,
+			"resolveOnly":            true, // Request only dependency resolution, not full Nix files
 			"quiet":                  false,
 			"explicitVersion":        explicitVersionParam,
 			"launcherJson":           nil,

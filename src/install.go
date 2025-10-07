@@ -18,15 +18,9 @@ func getNixpkgsURL() string {
 		return "github:NixOS/nixpkgs"
 	}
 
-	// Linux: check if NixOS
+	// Linux (both NixOS and non-NixOS) → github:NixOS/nixpkgs/unstable
 	if runtime.GOOS == "linux" {
-		// Check for NixOS by looking for /etc/NIXOS
-		if _, err := os.Stat("/etc/NIXOS"); err == nil {
-			// NixOS → github:NixOS/nixpkgs/nixos-unstable
-			return "github:NixOS/nixpkgs/nixos-unstable"
-		}
-		// non-NixOS Linux → github:NixOS/nixpkgs
-		return "github:NixOS/nixpkgs"
+		return "github:NixOS/nixpkgs/unstable"
 	}
 
 	// Fallback for other systems

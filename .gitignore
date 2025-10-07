@@ -26,3 +26,4 @@ go.work
 .DS_Store
 Thumbs.db
 .direnv
+test/a8-zero/logs/

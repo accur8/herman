@@ -2,35 +2,6 @@
 
 == current tasks ==
 
-    * pass webappExplode through to launcherArgs
-
-    * generate the nix-hash from the sha256
-      * available from the artifact's url so 
-
-
-      * convert the sha256 hex encoded to 
-          sha256-<base64(sha256-bytes)>
-      * use the newer fetchurl form    
-        fetchurl {
-          url = "...";
-          hash = "sha256-<base64string>";
-        }
-
-    * have locus / nixBuildDescription populate 
-
-        * sha256 m2RepoPath and filename
-
-          {
-            "url": "https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-collection-compat_2.13/2.7.0/scala-collection-compat_2.13-2.7.0.jar",
-            "sha256": "",
-            "organization": "org.scala-lang.modules",
-            "module": "scala-collection-compat_2.13",
-            "version": "2.7.0",
-            "m2RepoPath": "",
-            "filename": ""
-          }
-
-
 
 == DONE ==
 
@@ -91,3 +62,33 @@
         https://locus.accur8.net/repos/all/a8/a8-codegen_2.13/maven-metadata.xml
         noting build numbers are a timestamp and branch name combo
       * not doing this now simply because the nixBuildDescription web service is fast enough
+
+    * generate the nix-hash from the sha256
+      * available from the artifact's url so 
+
+
+      * convert the sha256 hex encoded to 
+          sha256-<base64(sha256-bytes)>
+      * use the newer fetchurl form    
+        fetchurl {
+          url = "...";
+          hash = "sha256-<base64string>";
+        }
+
+    * have locus / nixBuildDescription populate 
+
+        * sha256 m2RepoPath and filename
+
+          {
+            "url": "https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-collection-compat_2.13/2.7.0/scala-collection-compat_2.13-2.7.0.jar",
+            "sha256": "",
+            "organization": "org.scala-lang.modules",
+            "module": "scala-collection-compat_2.13",
+            "version": "2.7.0",
+            "m2RepoPath": "",
+            "filename": ""
+          }
+
+    * pass webappExplode through to launcherArgs
+        * so add a webappExplore to the a8-codegen.json file
+        * also irregardles of 

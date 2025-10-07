@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -9,8 +14,9 @@ import (
 )
 
 // FetchMissingHashes fetches SHA256 hashes for dependencies that don't have them
-// Uses nix-prefetch-url in parallel for efficiency
-func FetchMissingHashes(dependencies []Dependency) ([]Dependency, error) {
+// If useNixPrefetch is true, uses nix store prefetch-file (for installation)
+// If useNixPrefetch is false, fetches from Maven repository .sha256 files (for Nix generation)
+func FetchMissingHashes(dependencies []Dependency, useNixPrefetch bool) ([]Dependency, error) {
 	// Check if we need to fetch any hashes
 	needsFetch := false
 	for _, dep := range dependencies {
@@ -50,7 +56,14 @@ func FetchMissingHashes(dependencies []Dependency) ([]Dependency, error) {
 			go func(idx int, url string) {
 				defer wg.Done()
 
-				hash, err := fetchHashWithNixPrefetch(url)
+				var hash string
+				var err error
+				if useNixPrefetch {
+					hash, err = fetchHashWithNixPrefetch(url)
+				} else {
+					hash, err = fetchHashFromMavenRepo(url)
+				}
+
 				if err != nil {
 					resultChan <- hashResult{index: idx, err: fmt.Errorf("failed to fetch hash for %s: %w", url, err)}
 					return
@@ -82,26 +95,102 @@ func FetchMissingHashes(dependencies []Dependency) ([]Dependency, error) {
 	return result, nil
 }
 
-// fetchHashWithNixPrefetch uses nix-prefetch-url to fetch and hash a file
+// fetchHashWithNixPrefetch uses nix store prefetch-file to fetch and hash a file
+// This downloads the file and computes the hash, ensuring it's in the Nix store
+// Returns the hash in SRI format: sha256-<hash>
 func fetchHashWithNixPrefetch(url string) (string, error) {
-	trace("Fetching hash for: %s", url)
+	trace("Fetching hash with nix store prefetch-file for: %s", url)
 
-	// Run nix-prefetch-url which downloads the file and outputs the hash
-	cmd := exec.Command("nix-prefetch-url", url)
+	// Run nix store prefetch-file which downloads the file and outputs JSON with the hash
+	cmd := exec.Command("nix", "store", "prefetch-file", url, "--json")
 	output, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			return "", fmt.Errorf("nix-prefetch-url failed: %s", string(exitErr.Stderr))
+			return "", fmt.Errorf("nix store prefetch-file failed: %s", string(exitErr.Stderr))
 		}
-		return "", fmt.Errorf("failed to run nix-prefetch-url: %w", err)
+		return "", fmt.Errorf("failed to run nix store prefetch-file: %w", err)
 	}
 
-	// The output is the hash (with a newline)
-	hash := strings.TrimSpace(string(output))
-
-	if hash == "" {
-		return "", fmt.Errorf("nix-prefetch-url returned empty hash")
+	// Parse JSON output
+	var result struct {
+		Hash      string `json:"hash"`
+		StorePath string `json:"storePath"`
+	}
+	if err := json.Unmarshal(output, &result); err != nil {
+		return "", fmt.Errorf("failed to parse nix output: %w", err)
 	}
 
-	return hash, nil
+	if result.Hash == "" {
+		return "", fmt.Errorf("nix store prefetch-file returned empty hash")
+	}
+
+	// Hash is already in SRI format (sha256-...)
+	return result.Hash, nil
+}
+
+// fetchHashFromMavenRepo fetches the SHA256 hash from the Maven repository's .sha256 file
+// This is faster as it doesn't download the actual JAR file
+// Returns the hash in SRI format: sha256-<base64>
+func fetchHashFromMavenRepo(url string) (string, error) {
+	trace("Fetching hash from Maven repo for: %s", url)
+
+	// Append .sha256 to the URL
+	sha256URL := url + ".sha256"
+
+	// Fetch the .sha256 file
+	resp, err := http.Get(sha256URL)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch %s: %w", sha256URL, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to fetch %s: HTTP %d", sha256URL, resp.StatusCode)
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response: %w", err)
+	}
+
+	// The file typically contains just the hash, sometimes with whitespace or filename
+	// Extract just the hash part (first token)
+	hexHash := strings.TrimSpace(string(body))
+	// Some repos include the filename after the hash, so take just the first token
+	if parts := strings.Fields(hexHash); len(parts) > 0 {
+		hexHash = parts[0]
+	}
+
+	if hexHash == "" {
+		return "", fmt.Errorf("empty hash from %s", sha256URL)
+	}
+
+	// Validate it looks like a sha256 hash (64 hex characters)
+	if len(hexHash) != 64 {
+		return "", fmt.Errorf("invalid hash length from %s: got %d, expected 64", sha256URL, len(hexHash))
+	}
+
+	// Convert hex to SRI format (sha256-<base64>)
+	sriHash, err := hexToSRI(hexHash)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert hash to SRI format: %w", err)
+	}
+
+	return sriHash, nil
+}
+
+// hexToSRI converts a hex-encoded SHA256 hash to SRI format (sha256-<base64>)
+func hexToSRI(hexHash string) (string, error) {
+	// Decode hex to bytes
+	hashBytes, err := hex.DecodeString(hexHash)
+	if err != nil {
+		return "", fmt.Errorf("invalid hex hash: %w", err)
+	}
+
+	// Encode bytes to base64
+	base64Hash := base64.StdEncoding.EncodeToString(hashBytes)
+
+	// Return in SRI format
+	return "sha256-" + base64Hash, nil
 }

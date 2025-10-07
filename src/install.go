@@ -178,8 +178,9 @@ func installWithResponse(homeDir string, config *LauncherConfig, nixBuildResp *N
 		dependencies = nixBuildResp.ResolutionResponse.Artifacts
 
 		// Fetch missing hashes if needed
+		// Use nix-prefetch-url for installation to ensure files are in Nix store
 		var err error
-		dependencies, err = FetchMissingHashes(dependencies)
+		dependencies, err = FetchMissingHashes(dependencies, true)
 		if err != nil {
 			return fmt.Errorf("failed to fetch missing hashes: %w", err)
 		}
@@ -216,17 +217,18 @@ func installWithResponse(homeDir string, config *LauncherConfig, nixBuildResp *N
 
 		// Generate default.nix
 		nixConfig := LauncherNixConfig{
-			Name:         config.Name,
-			MainClass:    config.MainClass,
-			JvmArgs:      config.JvmArgs,
-			Args:         config.Args,
-			Repo:         config.Repo,
-			Organization: config.Organization,
-			Artifact:     config.Artifact,
-			Version:      version,
-			Branch:       config.Branch,
-			JavaVersion:  javaVersion,
-			Dependencies: dependencies,
+			Name:          config.Name,
+			MainClass:     config.MainClass,
+			JvmArgs:       config.JvmArgs,
+			Args:          config.Args,
+			Repo:          config.Repo,
+			Organization:  config.Organization,
+			Artifact:      config.Artifact,
+			Version:       version,
+			Branch:        config.Branch,
+			JavaVersion:   javaVersion,
+			WebappExplode: config.WebappExplode,
+			Dependencies:  dependencies,
 		}
 
 		defaultNixContent := GenerateDefaultNix(nixConfig)

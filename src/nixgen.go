@@ -18,17 +18,18 @@ type Dependency struct {
 
 // LauncherNixConfig holds the configuration for generating launcher Nix files
 type LauncherNixConfig struct {
-	Name         string
-	MainClass    string
-	JvmArgs      []string
-	Args         []string
-	Repo         string
-	Organization string
-	Artifact     string
-	Version      string
-	Branch       string
-	JavaVersion  string
-	Dependencies []Dependency
+	Name          string
+	MainClass     string
+	JvmArgs       []string
+	Args          []string
+	Repo          string
+	Organization  string
+	Artifact      string
+	Version       string
+	Branch        string
+	JavaVersion   string
+	WebappExplode *bool
+	Dependencies  []Dependency
 }
 
 // GenerateDefaultNix generates the default.nix file content
@@ -40,7 +41,7 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 	var depsBuilder strings.Builder
 	for i, dep := range config.Dependencies {
 		depsBuilder.WriteString(fmt.Sprintf(
-			"          { url = %q;  sha256 = %q;  organization = %q;  module = %q;  version = %q;  m2RepoPath = %q;  filename = %q;  }",
+			"          { url = %q;  hash = %q;  organization = %q;  module = %q;  version = %q;  m2RepoPath = %q;  filename = %q;  }",
 			dep.URL, dep.SHA256, dep.Organization, dep.Module, dep.Version, dep.M2RepoPath, dep.Filename,
 		))
 		if i < len(config.Dependencies)-1 {
@@ -56,6 +57,16 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 	javaVersionStr := "null"
 	if config.JavaVersion != "" {
 		javaVersionStr = fmt.Sprintf("%q", config.JavaVersion)
+	}
+
+	// Determine webappExplode value (or null)
+	webappExplodeStr := "null"
+	if config.WebappExplode != nil {
+		if *config.WebappExplode {
+			webappExplodeStr = "true"
+		} else {
+			webappExplodeStr = "false"
+		}
 	}
 
 	return fmt.Sprintf(`{
@@ -82,7 +93,7 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
         artifact = %q;
         version = %q;
         branch = %q;
-        webappExplode = null;
+        webappExplode = %s;
         javaVersion = %s;
 
         dependencies = [
@@ -96,7 +107,7 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
       dep: (
         fetchurl {
           url = dep.url;
-          sha256 = dep.sha256;
+          hash = dep.hash;
         }
       );
 
@@ -139,7 +150,7 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 
     stdenv.mkDerivation {
       name = launcherConfig.name;
-      src = ./.;
+      dontUnpack = true;
       installPhase = ''
 
         mkdir -p $out/bin
@@ -157,6 +168,7 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 #!${bash}/bin/bash
 # Generated at build time. Invokes the per-JDK wrapper (${launcherConfig.name}j).
 # -cp includes all jars in $out/lib plus the working dir.
+export HERMAN_NIX_STORE=$out
 exec $out/bin/${launcherConfig.name}j -cp $out/lib/*:. ${argsEscaped} "\$@"
 EOF
 
@@ -176,6 +188,7 @@ EOF
 		config.Artifact,
 		config.Version,
 		config.Branch,
+		webappExplodeStr,
 		javaVersionStr,
 		depsBuilder.String(),
 	)

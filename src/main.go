@@ -49,14 +49,15 @@ type HermanFlags struct {
 }
 
 type LauncherConfig struct {
-	MainClass    string   `json:"mainClass"`
-	Organization string   `json:"organization"`
-	Artifact     string   `json:"artifact"`
-	Branch       string   `json:"branch"`
-	JvmArgs      []string `json:"jvmArgs"`
-	Args         []string `json:"args"`
-	Name         string   `json:"name"`
-	Repo         string   `json:"repo"`
+	MainClass     string   `json:"mainClass"`
+	Organization  string   `json:"organization"`
+	Artifact      string   `json:"artifact"`
+	Branch        string   `json:"branch"`
+	JvmArgs       []string `json:"jvmArgs"`
+	Args          []string `json:"args"`
+	Name          string   `json:"name"`
+	Repo          string   `json:"repo"`
+	WebappExplode *bool    `json:"webappExplode,omitempty"`
 }
 
 type AppInstallerConfig struct {
@@ -466,8 +467,9 @@ func runGenerateCommand() error {
 	trace("Received %d dependencies from API", len(dependencies))
 
 	// Fetch missing hashes
+	// Use Maven repo .sha256 files for generation (faster, no downloads)
 	fmt.Fprintf(os.Stderr, "Fetching SHA256 hashes...\n")
-	dependencies, err = FetchMissingHashes(dependencies)
+	dependencies, err = FetchMissingHashes(dependencies, false)
 	if err != nil {
 		return fmt.Errorf("failed to fetch hashes: %w", err)
 	}
@@ -481,17 +483,18 @@ func runGenerateCommand() error {
 	fmt.Fprintf(os.Stderr, "Generating Nix files...\n")
 
 	nixConfig := LauncherNixConfig{
-		Name:         config.Name,
-		MainClass:    config.MainClass,
-		JvmArgs:      config.JvmArgs,
-		Args:         config.Args,
-		Repo:         config.Repo,
-		Organization: config.Organization,
-		Artifact:     config.Artifact,
-		Version:      latestVersion,
-		Branch:       config.Branch,
-		JavaVersion:  "", // Could be extracted from config if needed
-		Dependencies: dependencies,
+		Name:          config.Name,
+		MainClass:     config.MainClass,
+		JvmArgs:       config.JvmArgs,
+		Args:          config.Args,
+		Repo:          config.Repo,
+		Organization:  config.Organization,
+		Artifact:      config.Artifact,
+		Version:       latestVersion,
+		Branch:        config.Branch,
+		JavaVersion:   "", // Could be extracted from config if needed
+		WebappExplode: config.WebappExplode,
+		Dependencies:  dependencies,
 	}
 
 	defaultNixContent := GenerateDefaultNix(nixConfig)

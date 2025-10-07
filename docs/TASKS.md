@@ -1,25 +1,35 @@
 
 
+== current tasks ==
+
+    * pass webappExplode through to launcherArgs
+
+    * generate the nix-hash from the sha256
+      * available from the artifact's url so 
 
 
-* support java versions 8 11 17 21 22 23
+      * convert the sha256 hex encoded to 
+          sha256-<base64(sha256-bytes)>
+      * use the newer fetchurl form    
+        fetchurl {
+          url = "...";
+          hash = "sha256-<base64string>";
+        }
 
+    * have locus / nixBuildDescription populate 
 
-* option to create a re-usable build
-  * go back to using default.nix
-  * use this for nix-pins/{a8-codegen a8-zoo}
+        * sha256 m2RepoPath and filename
 
+          {
+            "url": "https://locus.accur8.net/repos/all/org/scala-lang/modules/scala-collection-compat_2.13/2.7.0/scala-collection-compat_2.13-2.7.0.jar",
+            "sha256": "",
+            "organization": "org.scala-lang.modules",
+            "module": "scala-collection-compat_2.13",
+            "version": "2.7.0",
+            "m2RepoPath": "",
+            "filename": ""
+          }
 
-* what if we wanted to use herman to install our apps
-  * 
-
-
-== future ideas if they have value ==
-
-    * resolve version info via
-        https://locus.accur8.net/repos/all/a8/a8-codegen_2.13/maven-metadata.xml
-        noting build numbers are a timestamp and branch name combo
-      * not doing this now simply because the nixBuildDescription web service is fast enough
 
 
 == DONE ==
@@ -69,3 +79,15 @@
           * add support for java 21 22 and 23 (in addition to the support for java 8 11 and 17 that the nix build already has)
 
           * we could generate a single flake.nix here that uses the root flake
+
+    * support java versions 8 11 17 21 22 23
+
+    * import on java-launcher.template
+
+    * option to create a re-usable build
+      * use this for nix-pins/{a8-codegen a8-zoo}
+
+    * resolve version info via
+        https://locus.accur8.net/repos/all/a8/a8-codegen_2.13/maven-metadata.xml
+        noting build numbers are a timestamp and branch name combo
+      * not doing this now simply because the nixBuildDescription web service is fast enough

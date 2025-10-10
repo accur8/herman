@@ -1,7 +1,6 @@
 package main
 
 import (
-	"archive/zip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -48,29 +47,20 @@ type ArtifactEntry struct {
 	Source    string `json:"source"`
 }
 
-// tryGetDependenciesFromJar attempts to get dependencies from a jar file's dependencies.json
+// tryGetDependenciesFromJar attempts to get dependencies from dependencies.json published in the repo
 // Returns the dependencies and version, or an error if not found
 func tryGetDependenciesFromJar(repoConfig *RepoConfig, homeDir, organization, artifact, version string) ([]Dependency, string, error) {
-	trace("Trying to get dependencies from jar file")
+	trace("Trying to get dependencies.json from repository")
 
-	// Construct the jar URL
-	jarURL := constructJarURL(repoConfig.URL, organization, artifact, version)
-	trace("Jar URL: %s", jarURL)
+	// Construct the dependencies.json URL
+	depsURL := constructDependenciesJsonURL(repoConfig.URL, organization, artifact, version)
+	trace("dependencies.json URL: %s", depsURL)
 
-	// Download the jar file to a temporary location
-	trace("Downloading jar file...")
-	jarPath, err := downloadJarFile(jarURL, repoConfig)
+	// Fetch dependencies.json directly
+	trace("Fetching dependencies.json...")
+	depsJson, err := fetchDependenciesJson(depsURL, repoConfig)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to download jar: %w", err)
-	}
-	defer os.Remove(jarPath)
-	trace("Downloaded jar to: %s", jarPath)
-
-	// Extract dependencies.json from the jar
-	trace("Extracting dependencies.json from jar...")
-	depsJson, err := extractDependenciesJson(jarPath)
-	if err != nil {
-		return nil, "", fmt.Errorf("dependencies.json not found in jar: %w", err)
+		return nil, "", fmt.Errorf("failed to fetch dependencies.json: %w", err)
 	}
 	trace("Found dependencies.json with %d dependencies", len(depsJson.Dependencies))
 
@@ -82,6 +72,68 @@ func tryGetDependenciesFromJar(repoConfig *RepoConfig, homeDir, organization, ar
 
 	trace("Converted %d dependencies from dependencies.json", len(dependencies))
 	return dependencies, depsJson.Version, nil
+}
+
+// constructDependenciesJsonURL builds the repository URL for dependencies.json
+// Pattern: {repoURL}/{org-path}/{artifact}/{version}/dependencies{scalaVersion}-{version}.json
+// Example: https://locus2.accur8.net/repos/all/a8/a8-zoolander_2.13/2.7.1-20251010_1148_master/dependencies_2.13-2.7.1-20251010_1148_master.json
+func constructDependenciesJsonURL(repoBaseURL, organization, artifact, version string) string {
+	// Convert organization to path (e.g., "io.accur8" -> "io/accur8", "a8" -> "a8")
+	orgPath := strings.ReplaceAll(organization, ".", "/")
+
+	// Extract scala version suffix from artifact name (e.g., "_2.13" from "a8-zoolander_2.13")
+	scalaVersion := ""
+	if idx := strings.LastIndex(artifact, "_"); idx != -1 {
+		scalaVersion = artifact[idx:] // includes the underscore, e.g., "_2.13"
+	}
+
+	// Build the URL: <repo>/<org-path>/<artifact>/<version>/dependencies<scala-version>-<version>.json
+	depsFilename := fmt.Sprintf("dependencies%s-%s.json", scalaVersion, version)
+	return fmt.Sprintf("%s/%s/%s/%s/%s",
+		strings.TrimRight(repoBaseURL, "/"),
+		orgPath,
+		artifact,
+		version,
+		depsFilename)
+}
+
+// fetchDependenciesJson fetches and parses dependencies.json from a URL
+func fetchDependenciesJson(url string, repoConfig *RepoConfig) (*DependenciesJson, error) {
+	// Create HTTP request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Add basic auth if credentials are provided
+	if repoConfig.User != "" && repoConfig.Password != "" {
+		req.SetBasicAuth(repoConfig.User, repoConfig.Password)
+	}
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+	}
+
+	// Read and parse JSON
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	var depsJson DependenciesJson
+	if err := json.Unmarshal(data, &depsJson); err != nil {
+		return nil, fmt.Errorf("failed to parse JSON: %w", err)
+	}
+
+	return &depsJson, nil
 }
 
 // constructJarURL builds the Maven repository URL for a jar file
@@ -166,44 +218,6 @@ func readDependenciesJsonFile(path string) (*DependenciesJson, error) {
 	}
 
 	return &depsJson, nil
-}
-
-// extractDependenciesJson extracts and parses dependencies.json from a jar file
-func extractDependenciesJson(jarPath string) (*DependenciesJson, error) {
-	// Open the jar file (it's a zip file)
-	zipReader, err := zip.OpenReader(jarPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open jar: %w", err)
-	}
-	defer zipReader.Close()
-
-	// Look for dependencies.json in the jar
-	for _, file := range zipReader.File {
-		if file.Name == "dependencies.json" || strings.HasSuffix(file.Name, "/dependencies.json") {
-			// Found dependencies.json, read it
-			rc, err := file.Open()
-			if err != nil {
-				return nil, fmt.Errorf("failed to open dependencies.json: %w", err)
-			}
-			defer rc.Close()
-
-			// Read the contents
-			data, err := io.ReadAll(rc)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read dependencies.json: %w", err)
-			}
-
-			// Parse JSON
-			var depsJson DependenciesJson
-			if err := json.Unmarshal(data, &depsJson); err != nil {
-				return nil, fmt.Errorf("failed to parse dependencies.json: %w", err)
-			}
-
-			return &depsJson, nil
-		}
-	}
-
-	return nil, fmt.Errorf("dependencies.json not found in jar")
 }
 
 // resolveRepoURL resolves a repo name to a URL

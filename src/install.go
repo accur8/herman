@@ -111,15 +111,15 @@ func checkForUpdates(homeDir string, config *LauncherConfig) (string, *NixBuildR
 	trace("Latest version for branch %s: %s", config.Branch, latestVersion)
 	fmt.Fprintf(os.Stderr, "Latest version: %s\n", latestVersion)
 
-	// Try to get dependencies from jar's dependencies.json first
-	trace("Attempting to get dependencies from jar's dependencies.json")
-	fmt.Fprintf(os.Stderr, "Fetching dependencies from jar...\n")
+	// Try to get dependencies from dependencies.json published in the repo
+	trace("Attempting to get dependencies from dependencies.json in repository")
+	fmt.Fprintf(os.Stderr, "Fetching dependencies.json from repository...\n")
 	dependencies, depsVersion, err := tryGetDependenciesFromJar(repoConfig, homeDir, config.Organization, config.Artifact, latestVersion)
 
 	if err == nil {
-		// Successfully got dependencies from jar
-		trace("Successfully got %d dependencies from jar's dependencies.json", len(dependencies))
-		fmt.Fprintf(os.Stderr, "Found dependencies.json in jar with %d dependencies\n", len(dependencies))
+		// Successfully got dependencies from dependencies.json
+		trace("Successfully got %d dependencies from dependencies.json", len(dependencies))
+		fmt.Fprintf(os.Stderr, "Found dependencies.json with %d dependencies\n", len(dependencies))
 
 		// Create a NixBuildResponse with the dependencies
 		nixBuildResp := &NixBuildResponse{
@@ -137,7 +137,7 @@ func checkForUpdates(homeDir string, config *LauncherConfig) (string, *NixBuildR
 	}
 
 	// dependencies.json not found or failed to parse
-	trace("Failed to get dependencies from jar: %v", err)
+	trace("Failed to get dependencies from repository: %v", err)
 
 	// Check if we should fall back to the API
 	// Default to false - users must explicitly opt-in to API fallback
@@ -147,7 +147,7 @@ func checkForUpdates(homeDir string, config *LauncherConfig) (string, *NixBuildR
 	}
 
 	if !useApi {
-		return "", nil, fmt.Errorf("dependencies.json not found in jar. Please ensure the jar contains a dependencies.json file, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", err)
+		return "", nil, fmt.Errorf("dependencies.json not found in repository. Please ensure dependencies.json is published alongside the artifact, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", err)
 	}
 
 	// Fall back to API (user has opted in)

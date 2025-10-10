@@ -111,18 +111,58 @@ func checkForUpdates(homeDir string, config *LauncherConfig) (string, *NixBuildR
 	trace("Latest version for branch %s: %s", config.Branch, latestVersion)
 	fmt.Fprintf(os.Stderr, "Latest version: %s\n", latestVersion)
 
-	// Call the API with the explicit version to get dependencies
+	// Try to get dependencies from jar's dependencies.json first
+	trace("Attempting to get dependencies from jar's dependencies.json")
+	fmt.Fprintf(os.Stderr, "Fetching dependencies from jar...\n")
+	dependencies, depsVersion, err := tryGetDependenciesFromJar(repoConfig, homeDir, config.Organization, config.Artifact, latestVersion)
+
+	if err == nil {
+		// Successfully got dependencies from jar
+		trace("Successfully got %d dependencies from jar's dependencies.json", len(dependencies))
+		fmt.Fprintf(os.Stderr, "Found dependencies.json in jar with %d dependencies\n", len(dependencies))
+
+		// Create a NixBuildResponse with the dependencies
+		nixBuildResp := &NixBuildResponse{
+			ResolutionResponse: ResolutionResponse{
+				Artifacts: dependencies,
+			},
+		}
+
+		// Use the version from dependencies.json if available, otherwise use latestVersion
+		if depsVersion != "" {
+			trace("Using version from dependencies.json: %s", depsVersion)
+			return depsVersion, nixBuildResp, nil
+		}
+		return latestVersion, nixBuildResp, nil
+	}
+
+	// dependencies.json not found or failed to parse
+	trace("Failed to get dependencies from jar: %v", err)
+
+	// Check if we should fall back to the API
+	// Default to false - users must explicitly opt-in to API fallback
+	useApi := false
+	if config.UseNixBuildDescriptionApi != nil {
+		useApi = *config.UseNixBuildDescriptionApi
+	}
+
+	if !useApi {
+		return "", nil, fmt.Errorf("dependencies.json not found in jar. Please ensure the jar contains a dependencies.json file, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", err)
+	}
+
+	// Fall back to API (user has opted in)
+	trace("Falling back to nixBuildDescription API (user opted in)")
+	fmt.Fprintf(os.Stderr, "dependencies.json not found, falling back to API (useNixBuildDescriptionApi=true)...\n")
+
 	programPath, err := os.Executable()
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to get executable path: %w", err)
 	}
 	programName := filepath.Join(filepath.Dir(programPath), filepath.Base(programPath))
 
-	trace("Fetching dependencies for version %s", latestVersion)
-	fmt.Fprintf(os.Stderr, "Fetching dependencies...\n")
 	nixBuildResp, err := callNixBuildDescriptionAPIWithVersion(repoConfig, config, programName, os.Args, latestVersion)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to get dependencies: %w", err)
+		return "", nil, fmt.Errorf("failed to get dependencies from API: %w", err)
 	}
 
 	// Check if we got dependencies in the response

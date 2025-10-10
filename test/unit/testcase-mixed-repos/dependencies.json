@@ -1,0 +1,65 @@
+{
+  "version": "2.7.1-20251010_0836_master",
+  "buildTime": "2025-10-10T12:36:45.123456Z",
+  "buildMachine": "172.24.91.147",
+  "buildUser": "glen",
+  "hostname": "starbak",
+  "gitBranch": "master",
+  "gitCommit": "525c1bff7bc447d7662ce54887a333190c4a65a0",
+  "gitState": "dirty",
+  "dependencies": [
+    {
+      "moduleId": {
+        "organization": "a8",
+        "artifact": "m3-common_2.13",
+        "version": "2.7.1-20251010_0836_master"
+      },
+      "resolver": "inter-project",
+      "artifacts": [
+        {
+          "name": "m3-common_2.13",
+          "type": "jar",
+          "extension": "jar",
+          "sha256": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456",
+          "source": "build"
+        }
+      ]
+    },
+    {
+      "moduleId": {
+        "organization": "com.google.guava",
+        "artifact": "guava",
+        "version": "32.1.2-jre"
+      },
+      "resolver": "public",
+      "artifacts": [
+        {
+          "name": "guava",
+          "type": "jar",
+          "extension": "jar",
+          "repo": "public_maven",
+          "path": "com/google/guava/guava/32.1.2-jre/guava-32.1.2-jre.jar",
+          "sha256": "f1a2b3c4d5e6f7890123456789abcdef0123456789abcdef0123456789abcdef",
+          "source": "repo"
+        }
+      ]
+    },
+    {
+      "moduleId": {
+        "organization": "io.accur8",
+        "artifact": "some-lib_2.13",
+        "version": "1.2.3"
+      },
+      "resolver": "locus",
+      "artifacts": [
+        {
+          "name": "some-lib_2.13",
+          "type": "jar",
+          "extension": "jar",
+          "sha256": "deadbeefcafebabedeadbeefcafebabedeadbeefcafebabedeadbeefcafebabe",
+          "source": "repo"
+        }
+      ]
+    }
+  ]
+}

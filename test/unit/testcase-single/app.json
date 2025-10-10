@@ -1,0 +1,6 @@
+{
+  "mainClass": "com.example.SingleApp",
+  "organization": "com.example",
+  "artifact": "single-app_2.13",
+  "branch": "master"
+}

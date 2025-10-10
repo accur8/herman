@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-20251010_1200_master",
+  "buildTime": "2025-10-10T12:00:00Z",
+  "buildMachine": "test-machine",
+  "buildUser": "test-user",
+  "hostname": "test.example.com",
+  "gitBranch": "master",
+  "gitCommit": "abc123",
+  "gitState": "clean",
+  "resolver": {
+    "name": "test-resolver",
+    "resolvedBy": "test"
+  },
+  "dependencies": []
+}

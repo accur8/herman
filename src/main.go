@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 )
 
@@ -49,16 +50,17 @@ type HermanFlags struct {
 }
 
 type LauncherConfig struct {
-	Kind          string   `json:"kind,omitempty"`
-	MainClass     string   `json:"mainClass"`
-	Organization  string   `json:"organization"`
-	Artifact      string   `json:"artifact"`
-	Branch        string   `json:"branch"`
-	JvmArgs       []string `json:"jvmArgs,omitempty"`
-	Args          []string `json:"args,omitempty"`
-	Name          string   `json:"name,omitempty"`
-	Repo          string   `json:"repo"`
-	WebappExplode *bool    `json:"webappExplode,omitempty"`
+	Kind                      string   `json:"kind,omitempty"`
+	MainClass                 string   `json:"mainClass"`
+	Organization              string   `json:"organization"`
+	Artifact                  string   `json:"artifact"`
+	Branch                    string   `json:"branch"`
+	JvmArgs                   []string `json:"jvmArgs,omitempty"`
+	Args                      []string `json:"args,omitempty"`
+	Name                      string   `json:"name,omitempty"`
+	Repo                      string   `json:"repo"`
+	WebappExplode             *bool    `json:"webappExplode,omitempty"`
+	UseNixBuildDescriptionApi *bool    `json:"useNixBuildDescriptionApi,omitempty"`
 }
 
 type AppInstallerConfig struct {
@@ -253,6 +255,9 @@ func readLauncherConfig(path string, defaultName string) (*LauncherConfig, error
 	if config.Args == nil {
 		config.Args = []string{}
 	}
+	if config.Repo == "" {
+		config.Repo = "repo"
+	}
 
 	return &config, nil
 }
@@ -417,20 +422,31 @@ func runCommandMode() error {
 
 func runGenerateCommand() error {
 	if len(os.Args) < 3 {
-		return fmt.Errorf("generate command requires a config file path\nUsage: herman generate <config.json> [output-dir]")
+		return fmt.Errorf("generate command requires a config file path\nUsage: herman generate <config.json> [output-dir] [--dependencies-json <file>] [--trace]")
 	}
 
 	configPath := os.Args[2]
 	outputDir := "."
-	if len(os.Args) >= 4 {
-		outputDir = os.Args[3]
-	}
+	var dependenciesJsonPath string
 
-	// Check for --trace flag
-	for _, arg := range os.Args[3:] {
-		if arg == "--trace" {
+	// Parse remaining arguments
+	for i := 3; i < len(os.Args); i++ {
+		arg := os.Args[i]
+		switch arg {
+		case "--trace":
 			traceMode = true
 			trace("Trace mode enabled")
+		case "--dependencies-json":
+			if i+1 >= len(os.Args) {
+				return fmt.Errorf("--dependencies-json requires a file path")
+			}
+			dependenciesJsonPath = os.Args[i+1]
+			i++ // Skip next arg
+		default:
+			// Assume it's the output directory if we haven't set it yet
+			if outputDir == "." && !strings.HasPrefix(arg, "--") {
+				outputDir = arg
+			}
 		}
 	}
 
@@ -453,39 +469,99 @@ func runGenerateCommand() error {
 		return fmt.Errorf("failed to ensure root flake: %w", err)
 	}
 
-	// Fetch maven metadata and get latest version
-	fmt.Fprintf(os.Stderr, "Fetching latest version for %s:%s...\n", config.Organization, config.Artifact)
+	var dependencies []Dependency
+	var latestVersion string
 
-	repoConfig, err := readRepoConfig(homeDir, config.Repo)
-	if err != nil {
-		return fmt.Errorf("failed to read repo config: %w", err)
+	// If dependencies.json path is provided, read it directly
+	if dependenciesJsonPath != "" {
+		trace("Reading dependencies from provided file: %s", dependenciesJsonPath)
+		fmt.Fprintf(os.Stderr, "Reading dependencies from %s...\n", dependenciesJsonPath)
+
+		depsJson, err := readDependenciesJsonFile(dependenciesJsonPath)
+		if err != nil {
+			return fmt.Errorf("failed to read dependencies.json: %w", err)
+		}
+
+		dependencies, err = convertDependenciesJsonToDependencies(depsJson, homeDir)
+		if err != nil {
+			return fmt.Errorf("failed to convert dependencies: %w", err)
+		}
+
+		latestVersion = depsJson.Version
+		if latestVersion == "" {
+			latestVersion = "unknown"
+		}
+
+		trace("Loaded %d dependencies from file", len(dependencies))
+		fmt.Fprintf(os.Stderr, "Loaded %d dependencies from file\n", len(dependencies))
+	} else {
+		// Normal flow: fetch maven metadata and get latest version
+		fmt.Fprintf(os.Stderr, "Fetching latest version for %s:%s...\n", config.Organization, config.Artifact)
+
+		repoConfig, err := readRepoConfig(homeDir, config.Repo)
+		if err != nil {
+			return fmt.Errorf("failed to read repo config: %w", err)
+		}
+
+		metadata, err := FetchMavenMetadata(repoConfig, config.Organization, config.Artifact)
+		if err != nil {
+			return fmt.Errorf("failed to fetch maven metadata: %w", err)
+		}
+
+		latestVersion, err = FindLatestVersion(metadata, config.Branch)
+		if err != nil {
+			return fmt.Errorf("failed to find latest version: %w", err)
+		}
+
+		fmt.Fprintf(os.Stderr, "Latest version: %s\n", latestVersion)
+
+		// Try to get dependencies from jar's dependencies.json first
+		trace("Attempting to get dependencies from jar's dependencies.json")
+		fmt.Fprintf(os.Stderr, "Fetching dependencies from jar...\n")
+		dependencies, depsVersion, err := tryGetDependenciesFromJar(repoConfig, homeDir, config.Organization, config.Artifact, latestVersion)
+
+		if err == nil {
+			// Successfully got dependencies from jar
+			trace("Successfully got %d dependencies from jar's dependencies.json", len(dependencies))
+			fmt.Fprintf(os.Stderr, "Found dependencies.json in jar with %d dependencies\n", len(dependencies))
+
+			// Use the version from dependencies.json if available
+			if depsVersion != "" {
+				trace("Using version from dependencies.json: %s", depsVersion)
+				latestVersion = depsVersion
+			}
+		} else {
+			// dependencies.json not found or failed to parse
+			trace("Failed to get dependencies from jar: %v", err)
+
+			// Check if we should fall back to the API
+			// Default to false - users must explicitly opt-in to API fallback
+			useApi := false
+			if config.UseNixBuildDescriptionApi != nil {
+				useApi = *config.UseNixBuildDescriptionApi
+			}
+
+			if !useApi {
+				return fmt.Errorf("dependencies.json not found in jar. Please ensure the jar contains a dependencies.json file, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", err)
+			}
+
+			// Fall back to API (user has opted in)
+			trace("Falling back to nixBuildDescription API (user opted in)")
+			fmt.Fprintf(os.Stderr, "dependencies.json not found, falling back to API (useNixBuildDescriptionApi=true)...\n")
+
+			nixBuildResp, err := callNixBuildDescriptionAPIWithVersion(repoConfig, config, config.Name, []string{}, latestVersion)
+			if err != nil {
+				return fmt.Errorf("failed to fetch dependencies from API: %w", err)
+			}
+
+			if len(nixBuildResp.ResolutionResponse.Artifacts) == 0 {
+				return fmt.Errorf("no dependencies returned from API")
+			}
+
+			dependencies = nixBuildResp.ResolutionResponse.Artifacts
+			trace("Received %d dependencies from API", len(dependencies))
+		}
 	}
-
-	metadata, err := FetchMavenMetadata(repoConfig, config.Organization, config.Artifact)
-	if err != nil {
-		return fmt.Errorf("failed to fetch maven metadata: %w", err)
-	}
-
-	latestVersion, err := FindLatestVersion(metadata, config.Branch)
-	if err != nil {
-		return fmt.Errorf("failed to find latest version: %w", err)
-	}
-
-	fmt.Fprintf(os.Stderr, "Latest version: %s\n", latestVersion)
-
-	// Fetch dependencies from API
-	fmt.Fprintf(os.Stderr, "Fetching dependencies...\n")
-	nixBuildResp, err := callNixBuildDescriptionAPIWithVersion(repoConfig, config, config.Name, []string{}, latestVersion)
-	if err != nil {
-		return fmt.Errorf("failed to fetch dependencies: %w", err)
-	}
-
-	if len(nixBuildResp.ResolutionResponse.Artifacts) == 0 {
-		return fmt.Errorf("no dependencies returned from API")
-	}
-
-	dependencies := nixBuildResp.ResolutionResponse.Artifacts
-	trace("Received %d dependencies from API", len(dependencies))
 
 	// Fetch missing hashes
 	// Use Maven repo .sha256 files for generation (faster, no downloads)
@@ -567,8 +643,11 @@ USAGE:
 
 COMMANDS:
   help                        Show this help message
-  generate <config.json> [output-dir]
+  generate <config.json> [output-dir] [--dependencies-json <file>] [--trace]
                               Generate Nix files from config (for embedding in Nix builds)
+                              Options:
+                                --dependencies-json <file>  Use dependencies from file (for testing)
+                                --trace                     Enable verbose trace output
   update <symlink>            Update a specific installation
   list                        List all installations
   clean <org>/<artifact>      Clean old versions
@@ -576,8 +655,13 @@ COMMANDS:
   info <symlink>              Show installation info
 
 EXAMPLES:
-  herman help
+  # Generate from jar (normal use)
   herman generate my-app.json ./nix-output
+
+  # Generate from dependencies.json file (testing/offline)
+  herman generate my-app.json ./nix-output --dependencies-json deps.json
+
+  # Other commands
   herman update ~/bin/a8-codegen
   herman list
   herman clean io.accur8/a8-versions_3

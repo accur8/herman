@@ -2,6 +2,10 @@
 
 == current tasks ==
 
+    * put dependency tree in jar file
+
+    * how to use herman for server deployments
+
 
 == DONE ==
 

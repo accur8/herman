@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0-20251010_1200_master",
+  "buildTime": "2025-10-10T12:00:00Z",
+  "buildMachine": "test-machine",
+  "buildUser": "test-user",
+  "hostname": "test.example.com",
+  "gitBranch": "master",
+  "gitCommit": "abc123",
+  "gitState": "clean",
+  "resolver": {
+    "name": "test-resolver",
+    "resolvedBy": "test"
+  },
+  "dependencies": [
+    {
+      "moduleId": {
+        "organization": "com.google.guava",
+        "name": "guava",
+        "version": "32.1.2-jre"
+      },
+      "artifacts": [
+        {
+          "name": "guava",
+          "type": "jar",
+          "extension": "jar",
+          "repo": "public_maven",
+          "path": "com/google/guava/guava/32.1.2-jre/guava-32.1.2-jre.jar",
+          "sha256": "f2a1f3e6a1e5f8d5b2e3c4d5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5",
+          "source": "test"
+        }
+      ]
+    }
+  ]
+}

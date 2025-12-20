@@ -482,6 +482,7 @@ func runGenerateCommand() error {
 
 	var dependencies []Dependency
 	var latestVersion string
+	var depsVersion string
 
 	// If dependencies.json path is provided, read it directly
 	if dependenciesJsonPath != "" {
@@ -529,7 +530,7 @@ func runGenerateCommand() error {
 		// Try to get dependencies from dependencies.json published in the repo
 		trace("Attempting to get dependencies from dependencies.json in repository")
 		fmt.Fprintf(os.Stderr, "Fetching dependencies.json from repository...\n")
-		dependencies, depsVersion, err := tryGetDependenciesFromJar(repoConfig, homeDir, config.Organization, config.Artifact, latestVersion)
+		dependencies, depsVersion, err = tryGetDependenciesFromJar(repoConfig, homeDir, config.Organization, config.Artifact, latestVersion)
 
 		if err == nil {
 			// Successfully got dependencies from dependencies.json

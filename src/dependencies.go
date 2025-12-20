@@ -75,20 +75,14 @@ func tryGetDependenciesFromJar(repoConfig *RepoConfig, homeDir, organization, ar
 }
 
 // constructDependenciesJsonURL builds the repository URL for dependencies.json
-// Pattern: {repoURL}/{org-path}/{artifact}/{version}/dependencies{scalaVersion}-{version}.json
-// Example: https://locus2.accur8.net/repos/all/a8/a8-zoolander_2.13/2.7.1-20251010_1148_master/dependencies_2.13-2.7.1-20251010_1148_master.json
+// Pattern: {repoURL}/{org-path}/{artifact}/{version}/{artifact}-{version}-dependencies.json
+// Example: https://locus2.accur8.net/repos/all/io/accur8/a8-nefario_2.13/0.0.2-20251220_1053_master/a8-nefario_2.13-0.0.2-20251220_1053_master-dependencies.json
 func constructDependenciesJsonURL(repoBaseURL, organization, artifact, version string) string {
 	// Convert organization to path (e.g., "io.accur8" -> "io/accur8", "a8" -> "a8")
 	orgPath := strings.ReplaceAll(organization, ".", "/")
 
-	// Extract scala version suffix from artifact name (e.g., "_2.13" from "a8-zoolander_2.13")
-	scalaVersion := ""
-	if idx := strings.LastIndex(artifact, "_"); idx != -1 {
-		scalaVersion = artifact[idx:] // includes the underscore, e.g., "_2.13"
-	}
-
-	// Build the URL: <repo>/<org-path>/<artifact>/<version>/dependencies<scala-version>-<version>.json
-	depsFilename := fmt.Sprintf("dependencies%s-%s.json", scalaVersion, version)
+	// Build the URL: <repo>/<org-path>/<artifact>/<version>/<artifact>-<version>-dependencies.json
+	depsFilename := fmt.Sprintf("%s-%s-dependencies.json", artifact, version)
 	return fmt.Sprintf("%s/%s/%s/%s/%s",
 		strings.TrimRight(repoBaseURL, "/"),
 		orgPath,

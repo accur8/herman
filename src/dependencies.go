@@ -65,7 +65,7 @@ func tryGetDependenciesFromJar(repoConfig *RepoConfig, homeDir, organization, ar
 	trace("Found dependencies.json with %d dependencies", len(depsJson.Dependencies))
 
 	// Convert to Dependency structs
-	dependencies, err := convertDependenciesJsonToDependencies(depsJson, homeDir)
+	dependencies, err := convertDependenciesJsonToDependencies(depsJson, homeDir, repoConfig)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to convert dependencies: %w", err)
 	}
@@ -286,44 +286,171 @@ func constructArtifactURL(homeDir string, artifact *ArtifactEntry, moduleId *Mod
 	return fmt.Sprintf("%s/%s", repoURL, artifactPath), nil
 }
 
+// constructURLFromModule builds a URL from ModuleId when no artifact information is available
+// This handles the case where we have module metadata but need to construct the artifact URL
+// For io.accur8 modules, defaults to "repo". For others, requires explicit repo name.
+func constructURLFromModule(homeDir string, moduleId *ModuleId, repoName string, classifier string) (string, error) {
+	// If no repo name specified, default to "repo" for io.accur8 modules, otherwise error
+	if repoName == "" {
+		if moduleId.Organization == "io.accur8" {
+			repoName = "repo"
+		} else {
+			return "", fmt.Errorf("cannot construct URL for %s:%s - no artifact information and no resolver specified",
+				moduleId.Organization, moduleId.Artifact)
+		}
+	}
+
+	// Resolve repo to URL
+	repoURL, err := resolveRepoURL(homeDir, repoName)
+	if err != nil {
+		return "", fmt.Errorf("cannot construct URL for %s:%s: %w",
+			moduleId.Organization, moduleId.Artifact, err)
+	}
+	repoURL = strings.TrimRight(repoURL, "/")
+
+	// Build URL: {repoURL}/{org-path}/{artifact}/{version}/{artifact}-{version}[-classifier].jar
+	orgPath := strings.ReplaceAll(moduleId.Organization, ".", "/")
+
+	// Add classifier if provided
+	classifierSuffix := ""
+	if classifier != "" {
+		classifierSuffix = "-" + classifier
+	}
+
+	filename := fmt.Sprintf("%s-%s%s.jar", moduleId.Artifact, moduleId.Version, classifierSuffix)
+	url := fmt.Sprintf("%s/%s/%s/%s/%s",
+		repoURL,
+		orgPath,
+		moduleId.Artifact,
+		moduleId.Version,
+		filename)
+
+	return url, nil
+}
+
+// validateURLAndFetchHash validates that a URL is accessible and fetches its SHA256 hash
+// First tries to use nix store prefetch-file (for public URLs)
+// Falls back to downloading with auth if needed
+func validateURLAndFetchHash(url string, repoConfig *RepoConfig) (string, error) {
+	trace("Validating URL and fetching hash for: %s", url)
+
+	// Try nix store prefetch-file first (works for public URLs, computes hash, adds to store)
+	hash, err := fetchHashWithNixPrefetch(url)
+	if err == nil {
+		trace("Successfully fetched hash using nix store prefetch-file: %s", hash)
+		return hash, nil
+	}
+
+	trace("nix store prefetch-file failed (%v), trying with auth...", err)
+
+	// Fallback: validate URL with auth and download to compute hash
+	req, err := http.NewRequest("HEAD", url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Add basic auth if credentials are provided
+	if repoConfig.User != "" && repoConfig.Password != "" {
+		req.SetBasicAuth(repoConfig.User, repoConfig.Password)
+	}
+
+	// Send the HEAD request to validate
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to validate URL: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("URL not accessible: HTTP %d: %s", resp.StatusCode, resp.Status)
+	}
+
+	trace("URL validated with auth, downloading to compute SHA256...")
+
+	// Download the file with auth
+	tmpPath, err := downloadJarFile(url, repoConfig)
+	if err != nil {
+		return "", fmt.Errorf("failed to download for hash computation: %w", err)
+	}
+	defer os.Remove(tmpPath)
+
+	// Re-use nix store prefetch-file on the local file to compute hash in correct format
+	// This ensures we get the SRI format hash that matches what Nix expects
+	hash, err = fetchHashWithNixPrefetch("file://" + tmpPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to compute SHA256: %w", err)
+	}
+
+	trace("Computed SHA256: %s", hash)
+	return hash, nil
+}
+
 // convertDependenciesJsonToDependencies converts DependenciesJson to []Dependency
-func convertDependenciesJsonToDependencies(depsJson *DependenciesJson, homeDir string) ([]Dependency, error) {
+func convertDependenciesJsonToDependencies(depsJson *DependenciesJson, homeDir string, repoConfig *RepoConfig) ([]Dependency, error) {
 	var dependencies []Dependency
 
 	for _, depEntry := range depsJson.Dependencies {
-		// Find the jar artifact (type: jar, extension: jar)
+		// Find the jar artifact (type: jar OR extension: jar)
+		// Some dependencies might only have one of these set
 		var jarArtifact *ArtifactEntry
 		for i, artifact := range depEntry.Artifacts {
-			if artifact.Type == "jar" && artifact.Extension == "jar" {
+			// Accept if type is jar OR extension is jar (or both)
+			if artifact.Type == "jar" || artifact.Extension == "jar" {
 				jarArtifact = &depEntry.Artifacts[i]
 				break
 			}
 		}
 
+		var url string
+		var sha256 string
+		var err error
+
 		if jarArtifact == nil {
-			// Skip dependencies without jar artifacts
-			trace("Skipping dependency %s:%s - no jar artifact found",
-				depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact)
-			continue
-		}
-
-		// Construct URL
-		url, err := constructArtifactURL(homeDir, jarArtifact, &depEntry.ModuleId)
-		if err != nil {
-			return nil, fmt.Errorf("failed to construct URL for %s:%s: %w",
-				depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact, err)
-		}
-
-		// Convert SHA256 from hex to SRI format if needed
-		sha256 := jarArtifact.SHA256
-		if sha256 != "" && !strings.HasPrefix(sha256, "sha256-") {
-			// Assume it's hex and convert to SRI
-			sriHash, err := hexToSRI(sha256)
-			if err != nil {
-				return nil, fmt.Errorf("failed to convert hash for %s: %w",
-					depEntry.ModuleId.Artifact, err)
+			// No artifact entry - try to construct URL from module metadata
+			trace("No jar artifact found for %s:%s (has %d artifacts) - attempting to construct URL from module metadata",
+				depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact, len(depEntry.Artifacts))
+			// Log what artifacts we did find
+			for i, art := range depEntry.Artifacts {
+				trace("  Artifact %d: type=%s, extension=%s, name=%s, url=%s",
+					i, art.Type, art.Extension, art.Name, art.URL)
 			}
-			sha256 = sriHash
+
+			// Use resolver as repo name if available
+			repoName := depEntry.Resolver
+			url, err = constructURLFromModule(homeDir, &depEntry.ModuleId, repoName, "")
+			if err != nil {
+				return nil, fmt.Errorf("failed to construct URL for %s:%s: %w",
+					depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact, err)
+			}
+
+			// Validate URL and fetch SHA256
+			trace("Validating constructed URL and fetching SHA256 for %s:%s",
+				depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact)
+			sha256, err = validateURLAndFetchHash(url, repoConfig)
+			if err != nil {
+				return nil, fmt.Errorf("failed to validate/fetch hash for %s:%s at %s: %w",
+					depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact, url, err)
+			}
+		} else {
+			// Construct URL from artifact entry
+			url, err = constructArtifactURL(homeDir, jarArtifact, &depEntry.ModuleId)
+			if err != nil {
+				return nil, fmt.Errorf("failed to construct URL for %s:%s: %w",
+					depEntry.ModuleId.Organization, depEntry.ModuleId.Artifact, err)
+			}
+
+			// Convert SHA256 from hex to SRI format if needed
+			sha256 = jarArtifact.SHA256
+			if sha256 != "" && !strings.HasPrefix(sha256, "sha256-") {
+				// Assume it's hex and convert to SRI
+				sriHash, err := hexToSRI(sha256)
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert hash for %s: %w",
+						depEntry.ModuleId.Artifact, err)
+				}
+				sha256 = sriHash
+			}
 		}
 
 		// Construct m2RepoPath
@@ -334,7 +461,12 @@ func convertDependenciesJsonToDependencies(depsJson *DependenciesJson, homeDir s
 			depEntry.ModuleId.Version)
 
 		// Extract filename
-		filename := jarArtifact.Name + "-" + depEntry.ModuleId.Version + ".jar"
+		var filename string
+		if jarArtifact != nil {
+			filename = jarArtifact.Name + "-" + depEntry.ModuleId.Version + ".jar"
+		} else {
+			filename = depEntry.ModuleId.Artifact + "-" + depEntry.ModuleId.Version + ".jar"
+		}
 
 		// Create Dependency
 		dep := Dependency{

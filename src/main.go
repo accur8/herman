@@ -59,6 +59,7 @@ type LauncherConfig struct {
 	Args                      []string `json:"args,omitempty"`
 	Name                      string   `json:"name,omitempty"`
 	Repo                      string   `json:"repo"`
+	JavaVersion               string   `json:"javaVersion,omitempty"`
 	WebappExplode             *bool    `json:"webappExplode,omitempty"`
 	UseNixBuildDescriptionApi *bool    `json:"useNixBuildDescriptionApi,omitempty"`
 }
@@ -484,6 +485,12 @@ func runGenerateCommand() error {
 	var latestVersion string
 	var depsVersion string
 
+	// Get repo config (needed for both paths)
+	repoConfig, err := readRepoConfig(homeDir, config.Repo)
+	if err != nil {
+		return fmt.Errorf("failed to read repo config: %w", err)
+	}
+
 	// If dependencies.json path is provided, read it directly
 	if dependenciesJsonPath != "" {
 		trace("Reading dependencies from provided file: %s", dependenciesJsonPath)
@@ -494,7 +501,7 @@ func runGenerateCommand() error {
 			return fmt.Errorf("failed to read dependencies.json: %w", err)
 		}
 
-		dependencies, err = convertDependenciesJsonToDependencies(depsJson, homeDir)
+		dependencies, err = convertDependenciesJsonToDependencies(depsJson, homeDir, repoConfig)
 		if err != nil {
 			return fmt.Errorf("failed to convert dependencies: %w", err)
 		}
@@ -509,11 +516,6 @@ func runGenerateCommand() error {
 	} else {
 		// Normal flow: fetch maven metadata and get latest version
 		fmt.Fprintf(os.Stderr, "Fetching latest version for %s:%s...\n", config.Organization, config.Artifact)
-
-		repoConfig, err := readRepoConfig(homeDir, config.Repo)
-		if err != nil {
-			return fmt.Errorf("failed to read repo config: %w", err)
-		}
 
 		metadata, err := FetchMavenMetadata(repoConfig, config.Organization, config.Artifact)
 		if err != nil {
@@ -543,7 +545,7 @@ func runGenerateCommand() error {
 				latestVersion = depsVersion
 			}
 		} else {
-			// dependencies.json not found or failed to parse
+			// dependencies.json fetch or processing failed
 			trace("Failed to get dependencies from repository: %v", err)
 
 			// Check if we should fall back to the API
@@ -554,7 +556,17 @@ func runGenerateCommand() error {
 			}
 
 			if !useApi {
-				return fmt.Errorf("dependencies.json not found in repository. Please ensure dependencies.json is published alongside the artifact, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", err)
+				// Determine if it was a fetch error or conversion error based on the error message
+				errMsg := err.Error()
+				if strings.Contains(errMsg, "failed to convert dependencies") {
+					// dependencies.json was found but had issues
+					depsURL := constructDependenciesJsonURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
+					return fmt.Errorf("Found dependencies.json at %s but failed to process it: %w\n\nTo use API fallback instead, set \"useNixBuildDescriptionApi\": true in your config (accepts risks)", depsURL, err)
+				} else {
+					// dependencies.json not found
+					depsURL := constructDependenciesJsonURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
+					return fmt.Errorf("dependencies.json not found at %s\n\nPlease ensure dependencies.json is published alongside the artifact, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", depsURL, err)
+				}
 			}
 
 			// Fall back to API (user has opted in)
@@ -582,6 +594,36 @@ func runGenerateCommand() error {
 		return fmt.Errorf("failed to fetch hashes: %w", err)
 	}
 
+	// Add the main artifact to the dependencies list
+	trace("Adding main artifact %s:%s:%s to dependencies", config.Organization, config.Artifact, latestVersion)
+	mainArtifactURL := constructJarURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
+	trace("Main artifact URL: %s", mainArtifactURL)
+
+	// Fetch hash for main artifact
+	mainArtifactHash, err := fetchHashFromMavenRepo(mainArtifactURL)
+	if err != nil {
+		trace("Failed to fetch hash from .sha256 file, trying nix prefetch: %v", err)
+		mainArtifactHash, err = fetchHashWithNixPrefetch(mainArtifactURL)
+		if err != nil {
+			return fmt.Errorf("failed to fetch hash for main artifact %s:%s: %w", config.Organization, config.Artifact, err)
+		}
+	}
+
+	orgPath := strings.ReplaceAll(config.Organization, ".", "/")
+	mainArtifact := Dependency{
+		URL:          mainArtifactURL,
+		SHA256:       mainArtifactHash,
+		Organization: config.Organization,
+		Module:       config.Artifact,
+		Version:      latestVersion,
+		M2RepoPath:   fmt.Sprintf("%s/%s/%s", orgPath, config.Artifact, latestVersion),
+		Filename:     fmt.Sprintf("%s-%s.jar", config.Artifact, latestVersion),
+	}
+
+	// Prepend main artifact to dependencies (so it appears first in the list)
+	dependencies = append([]Dependency{mainArtifact}, dependencies...)
+	trace("Total dependencies including main artifact: %d", len(dependencies))
+
 	// Create output directory if it doesn't exist
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory: %w", err)
@@ -600,7 +642,7 @@ func runGenerateCommand() error {
 		Artifact:      config.Artifact,
 		Version:       latestVersion,
 		Branch:        config.Branch,
-		JavaVersion:   "", // Could be extracted from config if needed
+		JavaVersion:   config.JavaVersion,
 		WebappExplode: config.WebappExplode,
 		Dependencies:  dependencies,
 	}

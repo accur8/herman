@@ -34,15 +34,19 @@ type LauncherNixConfig struct {
 
 // GenerateDefaultNix generates the default.nix file content
 func GenerateDefaultNix(config LauncherNixConfig) string {
-	// Build JDK imports based on Java versions we support (8, 11, 17, 21, 22, 23)
-	jdkImports := "jdk8,\n  jdk11,\n  jdk17,\n  jdk21,\n  jdk22,\n  jdk23,"
+	// Determine which JDK to use as default (jdk25 if not specified in JSON)
+	javaVersion := config.JavaVersion
+	if javaVersion == "" {
+		javaVersion = "25"
+	}
+	jdkPackage := fmt.Sprintf("jdk%s", javaVersion)
 
-	// Build dependencies list
+	// Build dependencies list - only include url and hash (what fetchurl actually uses)
 	var depsBuilder strings.Builder
 	for i, dep := range config.Dependencies {
 		depsBuilder.WriteString(fmt.Sprintf(
-			"          { url = %q;  hash = %q;  organization = %q;  module = %q;  version = %q;  m2RepoPath = %q;  filename = %q;  }",
-			dep.URL, dep.SHA256, dep.Organization, dep.Module, dep.Version, dep.M2RepoPath, dep.Filename,
+			"          { url = %q; hash = %q; }",
+			dep.URL, dep.SHA256,
 		))
 		if i < len(config.Dependencies)-1 {
 			depsBuilder.WriteString("\n")
@@ -52,12 +56,6 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 	// Format JVM args
 	jvmArgsStr := formatNixList(config.JvmArgs)
 	argsStr := formatNixList(config.Args)
-
-	// Determine Java version string (or null)
-	javaVersionStr := "null"
-	if config.JavaVersion != "" {
-		javaVersionStr = fmt.Sprintf("%q", config.JavaVersion)
-	}
 
 	// Determine webappExplode value (or null)
 	webappExplodeStr := "null"
@@ -72,69 +70,37 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
 	return fmt.Sprintf(`{
   bash,
   fetchurl,
+  jdk ? null,
+  %s,
   lib,
   linkFarm,
-  %s
   stdenv,
   unzip,
 }:
 
   let
 
-    launcherConfig =
-      {
+    resolvedJdk = if jdk != null then jdk else %s;
 
-        name = %q;
-        mainClass = %q;
-        jvmArgs = %s;
-        args =  %s;
-        repo = %q;
-        organization = %q;
-        artifact = %q;
-        version = %q;
-        branch = %q;
-        webappExplode = %s;
-        javaVersion = %s;
+    name = %q;
+    mainClass = %q;
+    jvmArgs = %s;
+    args = %s;
+    webappExplode = %s;
 
-        dependencies = [
+    dependencies = [
 %s
-        ];
-      };
+    ];
 
-    webappExplode = if launcherConfig.webappExplode == null then false else launcherConfig.webappExplode;
+    artifacts = map (dep: fetchurl { url = dep.url; hash = dep.hash; }) dependencies;
 
-    fetcherFn =
-      dep: (
-        fetchurl {
-          url = dep.url;
-          hash = dep.hash;
-        }
-      );
-
-    javaVersion = launcherConfig.javaVersion;
-
-    jdk =
-      if javaVersion == null then jdk11
-      else if javaVersion == "8" then jdk8
-      else if javaVersion == "11" then jdk11
-      else if javaVersion == "17" then jdk17
-      else if javaVersion == "21" then jdk21
-      else if javaVersion == "22" then jdk22
-      else if javaVersion == "23" then jdk23
-      else abort("expected javaVersion = [ 8 | 11 | 17 | 21 | 22 | 23 ] got ${javaVersion}")
-    ;
-
-    artifacts = map fetcherFn launcherConfig.dependencies;
-
-    linkFarmEntryFn = drv: { name = drv.name; path = drv; };
-
-    classpathBuilder = linkFarm launcherConfig.name (map linkFarmEntryFn artifacts);
+    classpathBuilder = linkFarm name (map (drv: { name = drv.name; path = drv; }) artifacts);
 
     # Properly escape args for safe shell evaluation
-    argsEscaped = lib.escapeShellArgs (launcherConfig.jvmArgs ++ [launcherConfig.mainClass] ++ launcherConfig.args);
+    argsEscaped = lib.escapeShellArgs (jvmArgs ++ [mainClass] ++ args);
 
     webappExploder =
-      if webappExplode then
+      if webappExplode == true then
         ''
           echo exploding webapp-composite folder
           for jar in ${classpathBuilder}/*.jar
@@ -149,27 +115,27 @@ func GenerateDefaultNix(config LauncherNixConfig) string {
   in
 
     stdenv.mkDerivation {
-      name = launcherConfig.name;
+      name = name;
       dontUnpack = true;
       installPhase = ''
 
         mkdir -p $out/bin
 
         # create link to jdk bin so that top and other tools show the process name as something meaningful
-        ln -s ${jdk}/bin/java $out/bin/${launcherConfig.name}j
+        ln -s ${resolvedJdk}/bin/java $out/bin/${name}j
 
         # create link to lib folder derivation
         ln -s ${classpathBuilder} $out/lib
 
-        LAUNCHER=$out/bin/${launcherConfig.name}
+        LAUNCHER=$out/bin/${name}
 
         # Generate launcher script inline (no template file needed)
         cat > $LAUNCHER <<EOF
 #!${bash}/bin/bash
-# Generated at build time. Invokes the per-JDK wrapper (${launcherConfig.name}j).
+# Generated at build time. Invokes the per-JDK wrapper (${name}j).
 # -cp includes all jars in $out/lib plus the working dir.
 export HERMAN_NIX_STORE=$out
-exec $out/bin/${launcherConfig.name}j -cp $out/lib/*:. ${argsEscaped} "\$@"
+exec $out/bin/${name}j -cp $out/lib/*:. ${argsEscaped} "\$@"
 EOF
 
         chmod +x $LAUNCHER
@@ -178,18 +144,13 @@ EOF
       '' + webappExploder;
     }
 `,
-		jdkImports,
+		jdkPackage,
+		jdkPackage,
 		config.Name,
 		config.MainClass,
 		jvmArgsStr,
 		argsStr,
-		config.Repo,
-		config.Organization,
-		config.Artifact,
-		config.Version,
-		config.Branch,
 		webappExplodeStr,
-		javaVersionStr,
 		depsBuilder.String(),
 	)
 }

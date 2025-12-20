@@ -450,8 +450,19 @@ func runGenerateCommand() error {
 		}
 	}
 
+	// Determine the default name from the output directory or config filename
+	defaultName := ""
+	if outputDir != "" && outputDir != "." {
+		// Use the output directory name as the default name
+		defaultName = filepath.Base(outputDir)
+	} else {
+		// Use the config filename (without .json extension) as the default name
+		configBase := filepath.Base(configPath)
+		defaultName = strings.TrimSuffix(configBase, ".json")
+	}
+
 	// Read the config file
-	config, err := readLauncherConfig(configPath, "")
+	config, err := readLauncherConfig(configPath, defaultName)
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
 	}

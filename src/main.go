@@ -560,11 +560,11 @@ func runGenerateCommand() error {
 				errMsg := err.Error()
 				if strings.Contains(errMsg, "failed to convert dependencies") {
 					// dependencies.json was found but had issues
-					depsURL := constructDependenciesJsonURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
+					depsURL := ConstructDependenciesJsonURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
 					return fmt.Errorf("Found dependencies.json at %s but failed to process it: %w\n\nTo use API fallback instead, set \"useNixBuildDescriptionApi\": true in your config (accepts risks)", depsURL, err)
 				} else {
 					// dependencies.json not found
-					depsURL := constructDependenciesJsonURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
+					depsURL := ConstructDependenciesJsonURL(repoConfig.URL, config.Organization, config.Artifact, latestVersion)
 					return fmt.Errorf("dependencies.json not found at %s\n\nPlease ensure dependencies.json is published alongside the artifact, or set \"useNixBuildDescriptionApi\": true in your config to use the API fallback (accepts risks): %w", depsURL, err)
 				}
 			}

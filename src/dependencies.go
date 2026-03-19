@@ -53,12 +53,12 @@ func tryGetDependenciesFromJar(repoConfig *RepoConfig, homeDir, organization, ar
 	trace("Trying to get dependencies.json from repository")
 
 	// Construct the dependencies.json URL
-	depsURL := constructDependenciesJsonURL(repoConfig.URL, organization, artifact, version)
+	depsURL := ConstructDependenciesJsonURL(repoConfig.URL, organization, artifact, version)
 	trace("dependencies.json URL: %s", depsURL)
 
 	// Fetch dependencies.json directly
 	trace("Fetching dependencies.json...")
-	depsJson, err := fetchDependenciesJson(depsURL, repoConfig)
+	depsJson, err := FetchDependenciesJson(depsURL, repoConfig)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to fetch dependencies.json: %w", err)
 	}
@@ -74,10 +74,11 @@ func tryGetDependenciesFromJar(repoConfig *RepoConfig, homeDir, organization, ar
 	return dependencies, depsJson.Version, nil
 }
 
-// constructDependenciesJsonURL builds the repository URL for dependencies.json
+// ConstructDependenciesJsonURL builds the repository URL for dependencies.json
 // Pattern: {repoURL}/{org-path}/{artifact}/{version}/{artifact}-{version}-dependencies.json
 // Example: https://locus2.accur8.net/repos/all/io/accur8/a8-nefario_2.13/0.0.2-20251220_1053_master/a8-nefario_2.13-0.0.2-20251220_1053_master-dependencies.json
-func constructDependenciesJsonURL(repoBaseURL, organization, artifact, version string) string {
+// Exported for use by other packages (e.g., godev)
+func ConstructDependenciesJsonURL(repoBaseURL, organization, artifact, version string) string {
 	// Convert organization to path (e.g., "io.accur8" -> "io/accur8", "a8" -> "a8")
 	orgPath := strings.ReplaceAll(organization, ".", "/")
 
@@ -91,8 +92,9 @@ func constructDependenciesJsonURL(repoBaseURL, organization, artifact, version s
 		depsFilename)
 }
 
-// fetchDependenciesJson fetches and parses dependencies.json from a URL
-func fetchDependenciesJson(url string, repoConfig *RepoConfig) (*DependenciesJson, error) {
+// FetchDependenciesJson fetches and parses dependencies.json from a URL
+// Exported for use by other packages (e.g., godev)
+func FetchDependenciesJson(url string, repoConfig *RepoConfig) (*DependenciesJson, error) {
 	// Create HTTP request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
